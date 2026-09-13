@@ -14,7 +14,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
           <CheckCircle2 size={32} />
         </div>
         <h1 className="text-2xl font-bold">Order Confirmed!</h1>
-        <p className="mt-2 text-sm text-muted">Thank you for shopping with Voltrix. Your order has been placed successfully.</p>
+        <p className="mt-2 text-sm text-muted">Thank you for shopping with NovaMalt. Your order has been placed successfully.</p>
 
         <div className="mt-6 rounded-2xl bg-surface p-5 text-left">
           <div className="flex items-center justify-between text-sm">

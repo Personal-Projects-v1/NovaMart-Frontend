@@ -81,10 +81,10 @@ export const collections: Collection[] = [
 ];
 
 export const stores: Store[] = [
-  { id: "st-1", name: "Voltrix Kigali Heights", city: "Kigali", country: "Rwanda", address: "KG 7 Ave, Kigali Heights, Ground Floor", hours: "Mon-Sat: 9am - 8pm, Sun: 11am - 6pm", services: ["In-store pickup", "Repairs", "Trade-in"], lat: -1.9536, lng: 30.0916 },
-  { id: "st-2", name: "Voltrix Manhattan", city: "New York", country: "United States", address: "5th Avenue, New York, NY", hours: "Mon-Sun: 10am - 9pm", services: ["In-store pickup", "Genius Bar", "Trade-in"], lat: 40.758, lng: -73.9855 },
-  { id: "st-3", name: "Voltrix Oxford Street", city: "London", country: "United Kingdom", address: "Oxford Street, London", hours: "Mon-Sat: 9am - 8pm, Sun: 12pm - 6pm", services: ["In-store pickup", "Repairs"], lat: 51.5154, lng: -0.1415 },
-  { id: "st-4", name: "Voltrix Dubai Mall", city: "Dubai", country: "UAE", address: "The Dubai Mall, Level 1", hours: "Daily: 10am - 11pm", services: ["In-store pickup", "Repairs", "Trade-in"], lat: 25.1975, lng: 55.2796 },
+  { id: "st-1", name: "NovaMalt Kigali Heights", city: "Kigali", country: "Rwanda", address: "KG 7 Ave, Kigali Heights, Ground Floor", hours: "Mon-Sat: 9am - 8pm, Sun: 11am - 6pm", services: ["In-store pickup", "Repairs", "Trade-in"], lat: -1.9536, lng: 30.0916 },
+  { id: "st-2", name: "NovaMalt Manhattan", city: "New York", country: "United States", address: "5th Avenue, New York, NY", hours: "Mon-Sun: 10am - 9pm", services: ["In-store pickup", "Genius Bar", "Trade-in"], lat: 40.758, lng: -73.9855 },
+  { id: "st-3", name: "NovaMalt Oxford Street", city: "London", country: "United Kingdom", address: "Oxford Street, London", hours: "Mon-Sat: 9am - 8pm, Sun: 12pm - 6pm", services: ["In-store pickup", "Repairs"], lat: 51.5154, lng: -0.1415 },
+  { id: "st-4", name: "NovaMalt Dubai Mall", city: "Dubai", country: "UAE", address: "The Dubai Mall, Level 1", hours: "Daily: 10am - 11pm", services: ["In-store pickup", "Repairs", "Trade-in"], lat: 25.1975, lng: 55.2796 },
 ];
 
 function buildOrder(index: number, status: Order["status"]): Order {

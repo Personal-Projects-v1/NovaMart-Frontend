@@ -54,7 +54,7 @@ export const useCartStore = create<CartState>()(
         }),
       clear: () => set({ items: [] }),
     }),
-    { name: "voltrix-cart" }
+    { name: "NovaMalt-cart" }
   )
 );
 

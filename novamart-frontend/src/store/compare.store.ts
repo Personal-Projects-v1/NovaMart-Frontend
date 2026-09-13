@@ -33,6 +33,6 @@ export const useCompareStore = create<CompareState>()(
         return { added: true };
       },
     }),
-    { name: "voltrix-compare" }
+    { name: "NovaMalt-compare" }
   )
 );

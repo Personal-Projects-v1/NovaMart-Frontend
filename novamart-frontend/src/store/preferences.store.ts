@@ -19,6 +19,6 @@ export const usePreferencesStore = create<PreferencesState>()(
       setRegion: (regionCode) => set({ regionCode }),
       setCurrency: (currencyCode) => set({ currencyCode }),
     }),
-    { name: "voltrix-preferences" }
+    { name: "NovaMalt-preferences" }
   )
 );

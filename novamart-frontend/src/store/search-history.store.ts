@@ -21,7 +21,7 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
       },
       clear: () => set({ recent: [] }),
     }),
-    { name: "voltrix-search-history" }
+    { name: "NovaMalt-search-history" }
   )
 );
 

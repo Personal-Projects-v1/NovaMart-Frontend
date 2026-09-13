@@ -19,6 +19,6 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
         set({ productIds: [productId, ...rest].slice(0, MAX_ITEMS) });
       },
     }),
-    { name: "voltrix-recently-viewed" }
+    { name: "NovaMalt-recently-viewed" }
   )
 );

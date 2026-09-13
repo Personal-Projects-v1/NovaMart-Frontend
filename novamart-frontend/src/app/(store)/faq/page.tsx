@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 
 const FAQS = [
-  { q: "Is Voltrix an authorized retailer?", a: "Yes, we source directly from authorized distributors and certified vendors for every brand we carry." },
+  { q: "Is NovaMalt an authorized retailer?", a: "Yes, we source directly from authorized distributors and certified vendors for every brand we carry." },
   { q: "Can I change my order after placing it?", a: "You can cancel an order while it's in Processing status. For other changes, please contact support as soon as possible." },
   { q: "Do you offer installment payments?", a: "Yes, eligible products display installment pricing on the product page and at checkout." },
   { q: "How do I contact customer support?", a: "Visit our Contact page or Support Center to reach our team via form, email or phone." },

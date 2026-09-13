@@ -196,7 +196,7 @@ export default function CheckoutPage() {
               {[
                 { value: "standard" as const, label: "Standard Shipping", detail: "5-7 business days", price: subtotal > 200 ? 0 : 9.99 },
                 { value: "express" as const, label: "Express Shipping", detail: "2-3 business days", price: 19.99 },
-                { value: "pickup" as const, label: "Store Pickup", detail: "Voltrix Kigali Heights — ready in 24 hours", price: 0 },
+                { value: "pickup" as const, label: "Store Pickup", detail: "NovaMalt Kigali Heights — ready in 24 hours", price: 0 },
               ].map((opt) => (
                 <label key={opt.value} className="flex cursor-pointer items-center justify-between rounded-xl border border-border p-4 has-[:checked]:border-brand has-[:checked]:bg-brand-soft">
                   <span className="flex items-center gap-3">

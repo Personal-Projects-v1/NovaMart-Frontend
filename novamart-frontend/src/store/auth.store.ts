@@ -19,6 +19,6 @@ export const useAuthStore = create<AuthState>()(
       login: (user) => set({ user, isAuthenticated: true }),
       logout: () => set({ user: null, isAuthenticated: false }),
     }),
-    { name: "voltrix-auth" }
+    { name: "NovaMalt-auth" }
   )
 );
