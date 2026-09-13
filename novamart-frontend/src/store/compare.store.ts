@@ -33,6 +33,6 @@ export const useCompareStore = create<CompareState>()(
         return { added: true };
       },
     }),
-    { name: "NovaMalt-compare" }
+    { name: "NovaMart-compare" }
   )
 );

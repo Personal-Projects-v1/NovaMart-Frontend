@@ -21,7 +21,7 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
       },
       clear: () => set({ recent: [] }),
     }),
-    { name: "NovaMalt-search-history" }
+    { name: "NovaMart-search-history" }
   )
 );
 

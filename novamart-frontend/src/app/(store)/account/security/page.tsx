@@ -7,7 +7,7 @@ import { Button } from "@/components/common/button";
 
 const SESSIONS = [
   { id: "s1", device: "Chrome on Windows", location: "Kigali, Rwanda", current: true, icon: Monitor },
-  { id: "s2", device: "NovaMalt App on iPhone", location: "Kigali, Rwanda", current: false, icon: Smartphone },
+  { id: "s2", device: "NovaMart App on iPhone", location: "Kigali, Rwanda", current: false, icon: Smartphone },
 ];
 
 export default function SecurityPage() {

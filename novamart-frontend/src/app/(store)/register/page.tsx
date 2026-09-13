@@ -37,7 +37,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthShell title="Create your account" subtitle="Join NovaMalt for faster checkout and order tracking.">
+    <AuthShell title="Create your account" subtitle="Join NovaMart for faster checkout and order tracking.">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">

@@ -1,9 +1,9 @@
-export const SITE_NAME = "NovaMalt";
+export const SITE_NAME = "NovaMart";
 export const SITE_TAGLINE = "Power Your Everyday";
 export const SITE_DESCRIPTION =
-  "NovaMalt is a premium electronics marketplace for phones, laptops, audio, gaming, wearables and smart home tech.";
+  "NovaMart is a premium electronics marketplace for phones, laptops, audio, gaming, wearables and smart home tech.";
 
-export const SUPPORT_EMAIL = "support@NovaMalt.shop";
+export const SUPPORT_EMAIL = "support@NovaMart.shop";
 export const SUPPORT_PHONE = "+250 788 000 111";
 
 export const REGIONS = [
@@ -46,7 +46,7 @@ export const FOOTER_LINKS = {
     { label: "Warranty", href: "/warranty" },
   ],
   company: [
-    { label: "About NovaMalt", href: "/about" },
+    { label: "About NovaMart", href: "/about" },
     { label: "Careers", href: "/about#careers" },
     { label: "Terms of Service", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },

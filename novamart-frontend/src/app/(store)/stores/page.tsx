@@ -12,7 +12,7 @@ export default function StoresPage() {
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Store Locator" }]} />
-      <h1 className="mb-1 mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Find a NovaMalt Store</h1>
+      <h1 className="mb-1 mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Find a NovaMart Store</h1>
       <p className="mb-6 text-sm text-muted">Visit us in person for pickup, repairs and trade-ins.</p>
 
       <div className="mb-6 flex h-11 items-center gap-2 rounded-full border border-border bg-white px-4">

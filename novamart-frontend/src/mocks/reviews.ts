@@ -63,7 +63,7 @@ export const questions: ProductQuestion[] = products.slice(0, 14).map((p, i) => 
         i % 2 === 0
           ? "Yes, it supports 100-240V input so it works worldwide with the right plug adapter."
           : "You'll receive the main unit, a USB-C cable, quick start guide and warranty card.",
-      answeredBy: "NovaMalt Support",
+      answeredBy: "NovaMart Support",
       isStore: true,
       answeredAt: new Date(Date.now() - (i + 2) * 86400000).toISOString(),
       helpfulCount: 12 + i,

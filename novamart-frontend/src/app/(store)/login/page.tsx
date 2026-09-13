@@ -33,7 +33,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to your NovaMalt account to continue.">
+    <AuthShell title="Welcome back" subtitle="Sign in to your NovaMart account to continue.">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold">Email</span>
