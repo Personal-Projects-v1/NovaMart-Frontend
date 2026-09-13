@@ -25,6 +25,6 @@ export const useWishlistStore = create<WishlistState>()(
       remove: (productId) => set({ productIds: get().productIds.filter((id) => id !== productId) }),
       isSaved: (productId) => get().productIds.includes(productId),
     }),
-    { name: "NovaMalt-wishlist" }
+    { name: "NovaMart-wishlist" }
   )
 );

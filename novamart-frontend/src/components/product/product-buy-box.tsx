@@ -124,7 +124,7 @@ export function ProductBuyBox({ product }: { product: ProductWithRelations }) {
         </div>
         <div className="flex items-start gap-2">
           <RefreshCcw size={16} className="mt-0.5 shrink-0 text-brand" />
-          <span>30-day hassle-free returns · Store pickup available at NovaMalt Kigali Heights</span>
+          <span>30-day hassle-free returns · Store pickup available at NovaMart Kigali Heights</span>
         </div>
         <div className="flex items-start gap-2">
           <ShieldCheck size={16} className="mt-0.5 shrink-0 text-brand" />

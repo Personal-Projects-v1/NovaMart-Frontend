@@ -4,7 +4,7 @@ import { ProductListing } from "@/components/product/product-listing";
 
 export const metadata: Metadata = {
   title: "Shop All Products",
-  description: "Browse the full NovaMalt catalog of phones, laptops, audio, gaming gear and more.",
+  description: "Browse the full NovaMart catalog of phones, laptops, audio, gaming gear and more.",
 };
 
 export default function ShopPage() {

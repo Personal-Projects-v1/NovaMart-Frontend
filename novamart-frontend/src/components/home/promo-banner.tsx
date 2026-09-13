@@ -16,7 +16,7 @@ export function PromoBanner() {
         </div>
         <div className="flex flex-col justify-center gap-2 rounded-3xl bg-foreground p-8 text-white sm:p-10">
           <h3 className="text-xl font-bold">Trade in, save big</h3>
-          <p className="text-sm text-white/70">Trade in your old device and get up to $300 credit toward your next NovaMalt purchase.</p>
+          <p className="text-sm text-white/70">Trade in your old device and get up to $300 credit toward your next NovaMart purchase.</p>
           <Link href="/support" className="mt-2 w-fit">
             <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">Learn More</Button>
           </Link>
