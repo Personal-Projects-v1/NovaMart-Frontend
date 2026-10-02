@@ -9,7 +9,7 @@ export interface Brand {
   id: ID;
   slug: string;
   name: string;
-  logo: string;
+  logo?: string | null;
   description: string;
   productCount: number;
   featured?: boolean;

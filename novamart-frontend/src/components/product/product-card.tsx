@@ -27,11 +27,12 @@ export function ProductCard({
   return (
     <div
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-white transition-all hover:-translate-y-0.5 hover:shadow-lg",
+        "group relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-white transition-all duration-300 hover:-translate-y-1 hover:border-foreground/15 hover:shadow-lift",
         className
       )}
     >
-      <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface">
+      <div className="relative overflow-hidden">
+      <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-[#f3f4f6]">
         <Image
           src={product.images[0]}
           alt={product.name}
@@ -80,22 +81,26 @@ export function ProductCard({
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted">{product.brand.name}</span>
-        <Link href={`/product/${product.slug}`} className="line-clamp-2 text-sm font-semibold text-foreground hover:text-brand">
-          {product.name}
-        </Link>
-        <Rating value={product.rating} count={product.reviewCount} size={12} />
-        <PriceDisplay price={product.price} compareAtPrice={product.compareAtPrice} size="sm" className="mt-0.5" />
-
         <button
           type="button"
           disabled={outOfStock}
           onClick={() => addToCart(product, 1)}
-          className="mt-2 flex h-9 items-center justify-center gap-2 rounded-full bg-foreground text-xs font-semibold text-white transition hover:bg-brand disabled:pointer-events-none disabled:opacity-40 sm:opacity-0 sm:group-hover:opacity-100"
+          className="absolute inset-x-3 bottom-3 flex h-10 translate-y-[140%] items-center justify-center gap-2 rounded-full bg-foreground/95 text-xs font-semibold text-white shadow-lg backdrop-blur transition duration-300 hover:bg-brand group-hover:translate-y-0 focus-visible:translate-y-0 disabled:hidden max-sm:translate-y-0"
         >
-          <ShoppingCart size={14} /> Add to Cart
+          <ShoppingCart size={14} /> Add to cart
         </button>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-1.5 p-3.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{product.brand.name}</span>
+        <Link href={`/product/${product.slug}`} className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-foreground hover:text-brand">
+          {product.name}
+        </Link>
+        <Rating value={product.rating} count={product.reviewCount} size={12} />
+        <PriceDisplay price={product.price} compareAtPrice={product.compareAtPrice} size="sm" className="mt-auto pt-1" />
+        {product.stock > 0 && product.stock <= 10 && (
+          <p className="text-[11px] font-medium text-warning">Only {product.stock} left</p>
+        )}
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ export function ProductBuyBox({ product }: { product: ProductWithRelations }) {
       </div>
 
       <PriceDisplay price={product.price} compareAtPrice={product.compareAtPrice} size="lg" className="mt-4" />
-      <p className="mt-1 text-xs text-muted">or 4 interest-free payments of {(product.price / 4).toFixed(2)} with installments</p>
+      <p className="mt-1 text-xs text-muted">or 4 interest-free payments of ${(product.price / 4).toFixed(2)} with installments</p>
 
       <p className="mt-4 text-sm text-muted">{product.shortDescription}</p>
 

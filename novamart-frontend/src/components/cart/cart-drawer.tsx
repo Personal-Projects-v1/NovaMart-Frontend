@@ -9,6 +9,7 @@ import { QuantitySelector } from "@/components/common/quantity-selector";
 import { EmptyState, SkeletonLine } from "@/components/common/states";
 import { useCartStore } from "@/store/cart.store";
 import { useCartLines } from "@/hooks/use-cart-lines";
+import { FreeShippingMeter } from "@/components/cart/free-shipping-meter";
 import { formatPrice } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -47,6 +48,7 @@ export function CartDrawer() {
           />
         ) : (
           <div className="flex flex-col gap-4">
+            <FreeShippingMeter subtotal={subtotal} />
             {lines.map(({ item, product }) => {
               const overStock = item.quantity > product.stock;
               return (

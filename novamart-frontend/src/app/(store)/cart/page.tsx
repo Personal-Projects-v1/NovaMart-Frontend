@@ -11,6 +11,7 @@ import { Button } from "@/components/common/button";
 import { EmptyState, SkeletonLine } from "@/components/common/states";
 import { useCartStore } from "@/store/cart.store";
 import { useCartLines } from "@/hooks/use-cart-lines";
+import { FreeShippingMeter } from "@/components/cart/free-shipping-meter";
 import { validateCoupon } from "@/services/api/order.service";
 import { errorMessage } from "@/services/api/client";
 import { formatPrice } from "@/lib/utils";
@@ -80,6 +81,7 @@ export default function CartPage() {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-4">
+          <FreeShippingMeter subtotal={subtotal} />
           {lines.map(({ item, product }) => {
             const overStock = item.quantity > product.stock;
             return (

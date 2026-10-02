@@ -2,7 +2,7 @@ import { InfoPage } from "@/components/common/info-page";
 
 export default function ShippingPage() {
   return (
-    <InfoPage title="Shipping Information">
+    <InfoPage title="Shipping Information" intro="Delivery options, timelines and costs for every region we serve.">
       <p>We offer standard and express shipping to Rwanda, the United States, the United Kingdom and the UAE.</p>
       <p><strong className="text-foreground">Standard Shipping:</strong> 5-7 business days. Free on orders over $200, otherwise $9.99.</p>
       <p><strong className="text-foreground">Express Shipping:</strong> 2-3 business days for $19.99.</p>

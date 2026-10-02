@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { serverGet } from "@/lib/server-api";
 import type { Brand } from "@/types";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { BrandMark } from "@/components/common/brand-mark";
 
 // rendered from live API data on each request, so a build never needs the backend
 export const dynamic = "force-dynamic";
@@ -19,9 +19,7 @@ export default async function BrandsPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {brands.map((brand) => (
           <Link key={brand.slug} href={`/brand/${brand.slug}`} className="flex items-center gap-4 rounded-2xl border border-border bg-white p-5 hover:-translate-y-0.5 hover:shadow-md transition">
-            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-surface">
-              <Image src={brand.logo} alt={brand.name} fill sizes="56px" className="object-cover" />
-            </div>
+            <BrandMark brand={brand} size={56} />
             <div>
               <p className="font-bold">{brand.name}</p>
               <p className="text-xs text-muted">{brand.productCount} products</p>

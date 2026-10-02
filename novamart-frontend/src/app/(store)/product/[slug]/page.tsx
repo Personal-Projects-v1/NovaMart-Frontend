@@ -71,8 +71,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <ProductTabs product={product} reviews={reviews} questions={questions} />
 
       <div className="mt-4">
-        <ProductRail title="Frequently Bought Together" products={related.slice(0, 6)} />
-        <ProductRail title="You May Also Like" subtitle="Similar products customers also viewed" products={related} />
+        <ProductRail
+          contained={false}
+          title="Frequently bought together"
+          subtitle="Customers often pair these with this product"
+          products={related.slice(0, 4)}
+          columns="grid-cols-2 lg:grid-cols-4"
+        />
+        <ProductRail
+          contained={false}
+          title="You may also like"
+          subtitle="More from this category and brand"
+          products={related.slice(4)}
+          columns="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+        />
       </div>
 
       <RecentlyViewedSection />

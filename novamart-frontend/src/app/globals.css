@@ -27,8 +27,8 @@
   --color-brand-soft: var(--brand-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
@@ -39,6 +39,39 @@ body {
 
 * {
   scrollbar-color: #cfcfd3 transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--brand);
+  color: white;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  letter-spacing: -0.015em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .container-shell {
@@ -92,6 +125,38 @@ body {
 }
 .input:focus {
   border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent);
+}
+
+/* soft elevation tokens used by cards and banners */
+.shadow-soft {
+  box-shadow: 0 1px 2px rgb(16 17 27 / 0.04), 0 8px 24px -12px rgb(16 17 27 / 0.12);
+}
+.shadow-lift {
+  box-shadow: 0 2px 4px rgb(16 17 27 / 0.05), 0 18px 40px -18px rgb(16 17 27 / 0.28);
+}
+
+@keyframes hero-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .no-scrollbar::-webkit-scrollbar {

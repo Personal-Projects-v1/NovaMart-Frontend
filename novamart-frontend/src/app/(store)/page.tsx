@@ -24,9 +24,9 @@ export default async function HomePage() {
   const [trending, deals, newArrivals, bestSellers, recommended, brands, collections] = await Promise.all([
     getTrendingProducts(12),
     getFlashDeals(),
-    getNewArrivals(8),
-    getBestSellers(8),
-    getRecommendedProducts(8),
+    getNewArrivals(6),
+    getBestSellers(6),
+    getRecommendedProducts(6),
     listBrands(),
     listCollections(),
   ]);

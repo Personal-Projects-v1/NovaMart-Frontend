@@ -34,7 +34,7 @@ export default function AdminBrandsPage() {
 
   function openForm(brand: Brand | null) {
     setEditing(brand);
-    setForm(brand ? { name: brand.name, logo: brand.logo, description: brand.description, featured: brand.featured } : EMPTY);
+    setForm(brand ? { name: brand.name, logo: brand.logo ?? "", description: brand.description, featured: brand.featured } : EMPTY);
     setOpen(true);
   }
 

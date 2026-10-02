@@ -2,7 +2,7 @@ import { InfoPage } from "@/components/common/info-page";
 
 export default function PrivacyPage() {
   return (
-    <InfoPage title="Privacy Policy">
+    <InfoPage title="Privacy Policy" intro="What we collect, why we collect it, and the choices you have.">
       <p>NovaMart respects your privacy. This policy explains what information we collect, how we use it, and the choices you have.</p>
       <p><strong className="text-foreground">Information we collect:</strong> Account details, order history, shipping addresses, and browsing preferences to improve your experience.</p>
       <p><strong className="text-foreground">How we use it:</strong> To process orders, provide support, personalize recommendations, and send updates you&apos;ve opted into.</p>

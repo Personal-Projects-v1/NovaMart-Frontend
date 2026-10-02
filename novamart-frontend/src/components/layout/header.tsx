@@ -14,6 +14,7 @@ import { useCompareStore } from "@/store/compare.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useCategories } from "@/hooks/use-catalog";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/common/logo";
 
 function CountBubble({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -39,8 +40,12 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-border bg-white/95 backdrop-blur">
       <div className="hidden bg-foreground text-white lg:block">
         <div className="container-shell flex h-8 items-center justify-between text-xs">
-          <p className="animate-marquee whitespace-nowrap font-medium">
-            Free worldwide shipping on orders over $200 &nbsp;•&nbsp; 30-day hassle-free returns &nbsp;•&nbsp; New drops every Friday
+          <p className="flex items-center gap-4 font-medium">
+            <span>Free shipping on orders over $200</span>
+            <span className="text-white/30">|</span>
+            <span>30-day hassle-free returns</span>
+            <span className="hidden text-white/30 xl:inline">|</span>
+            <span className="hidden xl:inline">New drops every Friday</span>
           </p>
           <div className="flex items-center gap-4">
             <Link href="/track-order" className="hover:text-brand-soft">Track Order</Link>
@@ -55,16 +60,11 @@ export function Header() {
           <Menu size={24} />
         </button>
 
-        <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white">
-            <Icons.Zap size={18} fill="white" />
-          </span>
-          <span className="font-display text-xl font-extrabold tracking-tight text-foreground">{SITE_NAME}</span>
-        </Link>
+        <Logo />
 
-        <SearchBar className="hidden max-w-xl flex-1 md:block" />
+        <SearchBar className="hidden max-w-2xl flex-1 md:block" />
 
-        <nav className="ml-auto hidden items-center gap-1 xl:flex">
+        <nav className="ml-auto hidden items-center gap-1 2xl:flex">
           {MAIN_NAV.map((item) => (
             <Link key={item.href} href={item.href} className="rounded-md px-2.5 py-2 text-sm font-medium text-foreground/80 hover:bg-surface hover:text-foreground">
               {item.label}
@@ -72,7 +72,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 sm:ml-0">
+        <div className="ml-auto flex items-center gap-1 2xl:ml-0">
           <div className="hidden lg:block">
             <RegionCurrencySelector />
           </div>

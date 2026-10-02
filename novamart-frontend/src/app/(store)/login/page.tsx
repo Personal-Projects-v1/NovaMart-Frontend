@@ -74,14 +74,6 @@ function LoginForm() {
         <Button type="submit" size="lg" disabled={loading}>{loading ? "Signing in..." : "Sign In"}</Button>
       </form>
 
-      <div className="my-5 flex items-center gap-3 text-xs text-muted">
-        <div className="h-px flex-1 bg-border" /> OR <div className="h-px flex-1 bg-border" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Button variant="outline" onClick={() => toast.info("Google sign-in is not available in this demo.")}>Continue with Google</Button>
-        <Button variant="outline" onClick={() => toast.info("Apple sign-in is not available in this demo.")}>Continue with Apple</Button>
-      </div>
-
       <p className="mt-6 text-center text-sm text-muted">
         Don&apos;t have an account? <Link href="/register" className="font-semibold text-brand hover:underline">Sign up</Link>
       </p>

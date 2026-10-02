@@ -13,10 +13,9 @@ import {
   Star,
   Percent,
   Ticket,
-  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SITE_NAME } from "@/constants/site";
+import { Logo } from "@/components/common/logo";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -36,8 +35,8 @@ export function AdminSidebar() {
   return (
     <aside className="hidden w-60 shrink-0 border-r border-border bg-white lg:block">
       <div className="flex h-16 items-center gap-2 border-b border-border px-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white"><Zap size={16} fill="white" /></span>
-        <span className="font-display font-bold">{SITE_NAME} Admin</span>
+        <Logo size="sm" href="/admin" />
+        <span className="rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand">Admin</span>
       </div>
       <nav className="flex flex-col gap-1 p-3">
         {NAV.map((item) => {

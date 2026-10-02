@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AtSign, MessageCircle, Share2, Video, ShieldCheck, CreditCard } from "lucide-react";
 import { FOOTER_LINKS, SITE_NAME, SITE_TAGLINE, SUPPORT_EMAIL, SUPPORT_PHONE } from "@/constants/site";
 import { Newsletter } from "./newsletter";
+import { Logo } from "@/components/common/logo";
 
 const columns = [
   { title: "Shop", links: FOOTER_LINKS.shop },
@@ -23,8 +24,8 @@ export function Footer() {
 
       <div className="container-shell grid grid-cols-2 gap-8 py-12 sm:grid-cols-3 lg:grid-cols-6">
         <div className="col-span-2">
-          <Link href="/" className="text-xl font-extrabold">{SITE_NAME}</Link>
-          <p className="mt-1 text-sm text-white/50">{SITE_TAGLINE}</p>
+          <Logo tone="light" size="lg" />
+          <p className="mt-2 text-sm text-white/50">{SITE_TAGLINE}</p>
           <p className="mt-4 max-w-xs text-sm text-white/60">
             Your trusted marketplace for phones, laptops, audio, gaming and smart home tech — shipped across Rwanda, the US, UK and UAE.
           </p>

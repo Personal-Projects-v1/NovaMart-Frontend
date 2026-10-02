@@ -2,7 +2,7 @@ import { InfoPage } from "@/components/common/info-page";
 
 export default function TermsPage() {
   return (
-    <InfoPage title="Terms of Service">
+    <InfoPage title="Terms of Service" intro="The ground rules for using NovaMart.">
       <p>By using NovaMart, you agree to these terms. Please read them carefully.</p>
       <p><strong className="text-foreground">Orders:</strong> All orders are subject to product availability and confirmation of payment.</p>
       <p><strong className="text-foreground">Pricing:</strong> Prices are listed in USD and may vary by region and currency conversion.</p>
