@@ -5,7 +5,7 @@ import { SITE_DESCRIPTION, SITE_NAME } from "@/constants/site";
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} — Power Your Everyday`,
+    default: `${SITE_NAME} | Power Your Everyday`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
