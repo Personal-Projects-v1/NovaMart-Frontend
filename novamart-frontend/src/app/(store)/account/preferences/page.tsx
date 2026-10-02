@@ -4,13 +4,27 @@ import { toast } from "sonner";
 import { CURRENCIES, REGIONS } from "@/constants/site";
 import { usePreferencesStore } from "@/store/preferences.store";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useAuthStore } from "@/store/auth.store";
+import { updatePreferences } from "@/services/api/user.service";
+import { errorMessage } from "@/services/api/client";
+import type { CommunicationPreferences } from "@/types";
 
 export default function PreferencesPage() {
   const region = usePreferencesStore((s) => s.regionCode);
   const currency = usePreferencesStore((s) => s.currencyCode);
   const setRegion = usePreferencesStore((s) => s.setRegion);
   const setCurrency = usePreferencesStore((s) => s.setCurrency);
-  const [communication, setCommunication] = useState({ orderUpdates: true, promotions: true, priceDrops: true, newsletter: false });
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
+  // communication preferences are stored on the account, so they follow the customer across devices
+  const communication: CommunicationPreferences = user?.preferences ?? { orderUpdates: true, promotions: true, priceDrops: true, newsletter: false };
+  const savePrefs = useMutation({
+    mutationFn: updatePreferences,
+    onSuccess: (updated) => { setUser(updated); toast.success("Preferences saved"); },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+  const setCommunication = (next: CommunicationPreferences) => savePrefs.mutate(next);
   const [theme, setTheme] = useState<"light" | "system">("light");
 
   return (
@@ -47,7 +61,8 @@ export default function PreferencesPage() {
               <input
                 type="checkbox"
                 checked={communication[key as keyof typeof communication]}
-                onChange={(e) => setCommunication((c) => ({ ...c, [key]: e.target.checked }))}
+                disabled={savePrefs.isPending}
+                onChange={(e) => setCommunication({ ...communication, [key]: e.target.checked })}
                 className="accent-brand"
               />
             </label>

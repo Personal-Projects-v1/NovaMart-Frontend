@@ -9,14 +9,19 @@ import { Button } from "@/components/common/button";
 import { Rating } from "@/components/common/rating";
 import { PriceDisplay } from "@/components/common/price-display";
 import { useCompareStore } from "@/store/compare.store";
-import { products } from "@/mocks/products";
-import { brands } from "@/mocks/brands";
+import { useProductsByIds } from "@/hooks/use-catalog";
+import { SkeletonLine } from "@/components/common/states";
 
 export default function ComparePage() {
   const productIds = useCompareStore((s) => s.productIds);
   const remove = useCompareStore((s) => s.remove);
 
-  const items = productIds.map((id) => products.find((p) => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p);
+  const { byId, isLoading } = useProductsByIds(productIds);
+  const items = productIds.map((id) => byId.get(id)).filter((p): p is NonNullable<typeof p> => !!p);
+
+  if (isLoading && items.length === 0) {
+    return <div className="container-shell py-12"><SkeletonLine className="h-64 w-full" /></div>;
+  }
 
   if (items.length === 0) {
     return (
@@ -52,7 +57,7 @@ export default function ComparePage() {
             <tr>
               <th className="w-40 p-3 text-left text-xs font-semibold uppercase text-muted">Product</th>
               {items.map((p) => {
-                const brand = brands.find((b) => b.id === p.brandId);
+                const brand = p.brand;
                 return (
                   <th key={p.id} className="min-w-[200px] border-b border-border p-3 text-left align-top">
                     <button onClick={() => remove(p.id)} aria-label="Remove from compare" className="mb-2 flex h-6 w-6 items-center justify-center rounded-full bg-surface hover:bg-surface-strong">

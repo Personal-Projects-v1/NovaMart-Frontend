@@ -1,14 +1,16 @@
 "use client";
 
 import { use, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/common/button";
-import { orderById } from "@/mocks/misc";
-import { requestReturn } from "@/services/api/order.service";
+import { getOrder, requestReturn } from "@/services/api/order.service";
+import { errorMessage } from "@/services/api/client";
+import { SkeletonLine } from "@/components/common/states";
 import { cn } from "@/lib/utils";
 
 const REASONS = ["Damaged", "Wrong item", "Defective", "Not as described", "Changed my mind", "Other"];
@@ -16,10 +18,7 @@ const REASONS = ["Damaged", "Wrong item", "Defective", "Not as described", "Chan
 export default function ReturnRequestPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const order = orderById(id);
-  if (!order) notFound();
-  const safeOrder = order;
-
+  const { data: order, isLoading } = useQuery({ queryKey: ["me", "order", id], queryFn: () => getOrder(id) });
   const [step, setStep] = useState(0);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [reason, setReason] = useState("");
@@ -30,21 +29,33 @@ export default function ReturnRequestPage({ params }: { params: Promise<{ id: st
   const steps = ["Select Items", "Reason", "Details", "Refund Method", "Review"];
 
   async function submit() {
+    if (!order) return;
     setSubmitting(true);
-    const result = await requestReturn(safeOrder.id, { selectedItems, reason, explanation, refundMethod });
-    setSubmitting(false);
-    toast.success(`Return request ${result.returnId} submitted successfully.`);
-    router.push(`/account/orders/${safeOrder.id}`);
+    try {
+      const result = await requestReturn(order.id, { itemIds: selectedItems, reason, details: explanation, refundMethod });
+      toast.success(`Return request ${result.returnId} submitted successfully.`);
+      router.push(`/account/orders/${order.id}`);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (isLoading) return <SkeletonLine className="h-64 w-full" />;
+  if (!order) notFound();
+  if (order.status !== "delivered") {
+    return <p className="text-sm text-muted">Only delivered orders can be returned. <button onClick={() => router.back()} className="font-semibold text-brand hover:underline">Go back</button></p>;
   }
 
   return (
     <div>
-      <h2 className="mb-1 text-lg font-bold">Return Request — {safeOrder.orderNumber}</h2>
+      <h2 className="mb-1 text-lg font-bold">Return Request — {order.orderNumber}</h2>
       <p className="mb-6 text-sm text-muted">Step {step + 1} of {steps.length}: {steps[step]}</p>
 
       {step === 0 && (
         <div className="flex flex-col gap-3">
-          {safeOrder.items.map((item) => (
+          {order.items.map((item) => (
             <label key={item.id} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border p-3 has-[:checked]:border-brand has-[:checked]:bg-brand-soft">
               <input
                 type="checkbox"

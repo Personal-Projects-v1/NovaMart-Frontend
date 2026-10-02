@@ -1,12 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { categories } from "@/mocks/categories";
+import { serverGet } from "@/lib/server-api";
+import type { Category } from "@/types";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+
+// rendered from live API data on each request, so a build never needs the backend
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "All Categories" };
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const categories = (await serverGet<Category[]>("/categories")) ?? [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Categories" }]} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,15 +10,33 @@ import { Download, RotateCcw, XCircle, RefreshCw, Star, MessageCircle } from "lu
 import { Button } from "@/components/common/button";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
 import { OrderTimeline } from "@/components/account/order-timeline";
-import { orderById } from "@/mocks/misc";
+import { cancelOrder, getOrder } from "@/services/api/order.service";
+import { errorMessage } from "@/services/api/client";
+import { useCartStore } from "@/store/cart.store";
+import { SkeletonLine, ErrorState } from "@/components/common/states";
 import { formatDate, formatPrice } from "@/lib/utils";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const order = orderById(id);
+  const queryClient = useQueryClient();
+  const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartStore((s) => s.openCart);
+  const { data: order, isLoading, isError, refetch } = useQuery({ queryKey: ["me", "order", id], queryFn: () => getOrder(id) });
+  const cancel = useMutation({
+    mutationFn: () => cancelOrder(id),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["me", "order", id], updated);
+      void queryClient.invalidateQueries({ queryKey: ["me", "orders"] });
+      toast.success("Order cancelled");
+    },
+    onError: (e) => toast.error(errorMessage(e)),
+  });
+
+  if (isLoading) return <div className="flex flex-col gap-4"><SkeletonLine className="h-10 w-64" /><SkeletonLine className="h-64 w-full" /></div>;
+  if (isError) return <ErrorState onRetry={() => refetch()} />;
   if (!order) notFound();
 
-  const canCancel = order.status === "processing";
+  const canCancel = ["processing", "confirmed", "packed"].includes(order.status);
   const canReturn = order.status === "delivered";
 
   return (
@@ -50,10 +69,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     <p className="text-xs text-muted">Qty {item.quantity}</p>
                   </div>
                   <span className="text-sm font-bold">{formatPrice(item.price * item.quantity)}</span>
-                  {order.status === "delivered" && (
-                    <Button variant="outline" size="sm">
-                      <Star size={12} /> Review
-                    </Button>
+                  {order.status === "delivered" && item.productSlug && (
+                    <Link href={`/product/${item.productSlug}#reviews`}>
+                      <Button variant="outline" size="sm">
+                        <Star size={12} /> Review
+                      </Button>
+                    </Link>
                   )}
                 </div>
               ))}
@@ -61,16 +82,23 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => toast.success("Invoice downloaded (mock)")}> <Download size={14} /> Download Invoice</Button>
+            <Button variant="outline" onClick={() => window.print()}> <Download size={14} /> Print Invoice</Button>
             {canCancel && (
-              <Button variant="outline" onClick={() => toast.success("Order cancelled")}> <XCircle size={14} /> Cancel Order</Button>
+              <Button variant="outline" disabled={cancel.isPending} onClick={() => { if (window.confirm("Cancel this order?")) cancel.mutate(); }}> <XCircle size={14} /> {cancel.isPending ? "Cancelling..." : "Cancel Order"}</Button>
             )}
             {canReturn && (
               <Link href={`/account/orders/${order.id}/return`}>
                 <Button variant="outline"><RotateCcw size={14} /> Request Return</Button>
               </Link>
             )}
-            <Button variant="outline" onClick={() => toast.success("Items added to cart")}> <RefreshCw size={14} /> Buy Again</Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                order.items.filter((i) => i.productId).forEach((i) => addItem(i.productId, i.quantity, i.selectedVariants));
+                toast.success("Items added to cart");
+                openCart();
+              }}
+            > <RefreshCw size={14} /> Buy Again</Button>
             <Link href="/support"><Button variant="outline"><MessageCircle size={14} /> Contact Support</Button></Link>
           </div>
         </div>

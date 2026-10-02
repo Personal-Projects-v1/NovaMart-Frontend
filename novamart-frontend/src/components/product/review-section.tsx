@@ -10,6 +10,10 @@ import { Rating } from "@/components/common/rating";
 import { Button } from "@/components/common/button";
 import { EmptyState } from "@/components/common/states";
 import { relativeTime } from "@/lib/utils";
+import Link from "next/link";
+import { useAuthStore } from "@/store/auth.store";
+import { createReview, markReviewHelpful } from "@/services/api/product.service";
+import { errorMessage } from "@/services/api/client";
 import type { Review } from "@/types";
 
 const reviewSchema = z.object({
@@ -24,6 +28,9 @@ export function ReviewSection({ reviews, productId }: { reviews: Review[]; produ
   const [sort, setSort] = useState<"recent" | "helpful">("recent");
   const [localReviews, setLocalReviews] = useState(reviews);
   const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [voted, setVoted] = useState<Set<string>>(new Set());
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
@@ -41,22 +48,30 @@ export function ReviewSection({ reviews, productId }: { reviews: Review[]; produ
     .filter((r) => (filterStars ? r.rating === filterStars : true))
     .sort((a, b) => (sort === "recent" ? +new Date(b.createdAt) - +new Date(a.createdAt) : b.helpfulCount - a.helpfulCount));
 
-  function onSubmit(values: ReviewFormValues) {
-    const newReview: Review = {
-      id: `rev-new-${Date.now()}`,
-      productId,
-      userName: "You",
-      rating: values.rating,
-      title: values.title,
-      body: values.body,
-      verifiedPurchase: true,
-      helpfulCount: 0,
-      createdAt: new Date().toISOString(),
-    };
-    setLocalReviews([newReview, ...localReviews]);
-    toast.success("Thanks! Your review has been submitted.");
-    reset({ rating: 0, title: "", body: "" });
-    setShowForm(false);
+  async function onSubmit(values: ReviewFormValues) {
+    setSubmitting(true);
+    try {
+      const created = await createReview(productId, values);
+      setLocalReviews([created, ...localReviews]);
+      toast.success("Thanks! Your review has been submitted.");
+      reset({ rating: 0, title: "", body: "" });
+      setShowForm(false);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function vote(reviewId: string) {
+    if (voted.has(reviewId)) return;
+    setVoted(new Set(voted).add(reviewId));
+    setLocalReviews((list) => list.map((r) => (r.id === reviewId ? { ...r, helpfulCount: r.helpfulCount + 1 } : r)));
+    try {
+      await markReviewHelpful(reviewId);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
   }
 
   return (
@@ -98,7 +113,12 @@ export function ReviewSection({ reviews, productId }: { reviews: Review[]; produ
             )}
           </div>
 
-          {showForm && (
+          {showForm && !isAuthenticated && (
+            <p className="mb-6 rounded-2xl border border-border p-4 text-sm text-muted">
+              Please <Link href={`/login?next=${encodeURIComponent(typeof window === "undefined" ? "/" : window.location.pathname)}`} className="font-semibold text-brand hover:underline">sign in</Link> to write a review.
+            </p>
+          )}
+          {showForm && isAuthenticated && (
             <form onSubmit={handleSubmit(onSubmit)} className="mb-6 rounded-2xl border border-border p-4">
               <p className="mb-2 text-sm font-semibold">Your rating</p>
               <div className="mb-3 flex gap-1">
@@ -113,7 +133,7 @@ export function ReviewSection({ reviews, productId }: { reviews: Review[]; produ
               {errors.title && <p className="mb-2 text-xs text-brand">{errors.title.message}</p>}
               <textarea {...register("body")} placeholder="Share your thoughts about this product" rows={3} className="mb-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-brand" />
               {errors.body && <p className="mb-2 text-xs text-brand">{errors.body.message}</p>}
-              <Button type="submit" size="sm">Submit Review</Button>
+              <Button type="submit" size="sm" disabled={submitting}>{submitting ? "Submitting..." : "Submit Review"}</Button>
             </form>
           )}
 
@@ -142,7 +162,7 @@ export function ReviewSection({ reviews, productId }: { reviews: Review[]; produ
                   <Rating value={review.rating} showCount={false} className="my-2" />
                   <p className="text-sm font-semibold">{review.title}</p>
                   <p className="mt-1 text-sm text-muted">{review.body}</p>
-                  <button className="mt-2 flex items-center gap-1.5 text-xs text-muted hover:text-brand">
+                  <button onClick={() => vote(review.id)} disabled={voted.has(review.id)} className="mt-2 flex items-center gap-1.5 text-xs text-muted hover:text-brand disabled:text-brand">
                     <ThumbsUp size={12} /> Helpful ({review.helpfulCount})
                   </button>
                 </div>

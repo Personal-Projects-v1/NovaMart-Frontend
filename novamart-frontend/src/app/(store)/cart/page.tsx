@@ -8,15 +8,15 @@ import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { QuantitySelector } from "@/components/common/quantity-selector";
 import { Button } from "@/components/common/button";
-import { EmptyState } from "@/components/common/states";
+import { EmptyState, SkeletonLine } from "@/components/common/states";
 import { useCartStore } from "@/store/cart.store";
-import { productById } from "@/mocks/products";
+import { useCartLines } from "@/hooks/use-cart-lines";
 import { validateCoupon } from "@/services/api/order.service";
+import { errorMessage } from "@/services/api/client";
 import { formatPrice } from "@/lib/utils";
 import type { Coupon } from "@/types";
 
 export default function CartPage() {
-  const items = useCartStore((s) => s.items);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const [couponCode, setCouponCode] = useState("");
@@ -24,11 +24,7 @@ export default function CartPage() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
 
-  const lines = items
-    .map((item) => ({ item, product: productById(item.productId) }))
-    .filter((l): l is { item: typeof items[number]; product: NonNullable<ReturnType<typeof productById>> } => !!l.product);
-
-  const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.item.quantity, 0);
+  const { items, lines, subtotal, isLoading } = useCartLines();
   const discount = appliedCoupon
     ? appliedCoupon.type === "percent"
       ? Math.round(subtotal * (appliedCoupon.value / 100) * 100) / 100
@@ -41,14 +37,27 @@ export default function CartPage() {
   async function applyCoupon() {
     if (!couponCode.trim()) return;
     setCouponLoading(true);
-    const result = await validateCoupon(couponCode, subtotal);
-    setCouponLoading(false);
-    if (result.coupon) {
-      setAppliedCoupon(result.coupon);
-      toast.success(`Coupon "${result.coupon.code}" applied!`);
-    } else {
-      toast.error(result.error ?? "Invalid coupon code");
+    try {
+      const result = await validateCoupon(couponCode, subtotal);
+      if (result.coupon) {
+        setAppliedCoupon(result.coupon);
+        toast.success(`Coupon "${result.coupon.code}" applied!`);
+      } else {
+        toast.error(result.error ?? "Invalid coupon code");
+      }
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setCouponLoading(false);
     }
+  }
+
+  if (items.length > 0 && lines.length === 0 && isLoading) {
+    return (
+      <div className="container-shell flex flex-col gap-4 py-12">
+        {[0, 1, 2].map((i) => <SkeletonLine key={i} className="h-24 w-full" />)}
+      </div>
+    );
   }
 
   if (lines.length === 0) {

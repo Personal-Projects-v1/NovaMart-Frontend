@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Heart, Menu, Scale, ShoppingCart, User, X } from "lucide-react";
 import * as Icons from "lucide-react";
 import { SearchBar } from "./search-bar";
@@ -11,7 +11,8 @@ import { MAIN_NAV, SITE_NAME } from "@/constants/site";
 import { useCartCount, useCartStore } from "@/store/cart.store";
 import { useWishlistStore } from "@/store/wishlist.store";
 import { useCompareStore } from "@/store/compare.store";
-import { categories } from "@/mocks/categories";
+import { useAuthStore } from "@/store/auth.store";
+import { useCategories } from "@/hooks/use-catalog";
 import { cn } from "@/lib/utils";
 
 function CountBubble({ count }: { count: number }) {
@@ -25,6 +26,10 @@ function CountBubble({ count }: { count: number }) {
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  // the session lives in localStorage, so only trust it after mount to keep server and client markup identical
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const signedIn = useAuthStore((s) => s.isAuthenticated);
+  const { categories } = useCategories();
   const cartCount = useCartCount();
   const openCart = useCartStore((s) => s.openCart);
   const wishlistCount = useWishlistStore((s) => s.productIds.length);
@@ -71,7 +76,7 @@ export function Header() {
           <div className="hidden lg:block">
             <RegionCurrencySelector />
           </div>
-          <Link href="/account" aria-label="Account" className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface sm:flex">
+          <Link href={mounted && signedIn ? "/account" : "/login"} aria-label={mounted && signedIn ? "Account" : "Sign in"} className="hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface sm:flex">
             <User size={20} />
           </Link>
           <Link href="/compare" aria-label="Compare" className="relative hidden h-10 w-10 items-center justify-center rounded-full hover:bg-surface sm:flex">

@@ -4,14 +4,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import * as Icons from "lucide-react";
-import { categories } from "@/mocks/categories";
-import { products } from "@/mocks/products";
+import { useQuery } from "@tanstack/react-query";
+import { useCategories } from "@/hooks/use-catalog";
+import { listProducts } from "@/services/api/product.service";
 import { cn } from "@/lib/utils";
 
 export function MegaMenu() {
-  const [active, setActive] = useState<string>(categories[0].slug);
-  const activeCategory = categories.find((c) => c.slug === active)!;
-  const featured = products.filter((p) => p.categoryId === activeCategory.id).slice(0, 3);
+  const { categories } = useCategories();
+  const [active, setActive] = useState<string | null>(null);
+  const activeCategory = categories.find((c) => c.slug === active) ?? categories[0];
+  const { data: featuredPage } = useQuery({
+    queryKey: ["mega-menu-products", activeCategory?.slug],
+    queryFn: () => listProducts({ categorySlugs: [activeCategory!.slug], pageSize: 3 }),
+    enabled: !!activeCategory,
+    staleTime: 5 * 60 * 1000,
+  });
+  const featured = featuredPage?.items ?? [];
+
+  if (!activeCategory) return null;
 
   return (
     <div className="grid grid-cols-[220px_1fr] gap-0 overflow-hidden rounded-2xl border border-border bg-white shadow-2xl">
@@ -24,7 +34,7 @@ export function MegaMenu() {
               onMouseEnter={() => setActive(cat.slug)}
               className={cn(
                 "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition",
-                active === cat.slug ? "bg-white text-brand shadow-sm" : "text-foreground hover:bg-white/70"
+                activeCategory.slug === cat.slug ? "bg-white text-brand shadow-sm" : "text-foreground hover:bg-white/70"
               )}
             >
               <Icon size={16} /> {cat.name}

@@ -2,11 +2,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ProductGrid } from "@/components/product/product-grid";
-import { getCollectionBySlug } from "@/services/api/category.service";
-import { products } from "@/mocks/products";
-import { brands } from "@/mocks/brands";
-import { categories } from "@/mocks/categories";
-import type { ProductWithRelations } from "@/types";
+import { serverGet } from "@/lib/server-api";
+import type { Collection } from "@/types";
+
+const getCollectionBySlug = (slug: string) => serverGet<Collection>(`/collections/${encodeURIComponent(slug)}`);
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -19,10 +18,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   const collection = await getCollectionBySlug(slug);
   if (!collection) notFound();
 
-  const items: ProductWithRelations[] = collection.productIds
-    .map((id) => products.find((p) => p.id === id))
-    .filter((p): p is NonNullable<typeof p> => !!p)
-    .map((p) => ({ ...p, brand: brands.find((b) => b.id === p.brandId)!, category: categories.find((c) => c.id === p.categoryId)! }));
+  const items = collection.products ?? [];
 
   return (
     <div className="container-shell py-6">

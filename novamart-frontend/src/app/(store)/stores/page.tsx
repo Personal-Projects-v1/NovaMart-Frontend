@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { MapPin, Clock, Search } from "lucide-react";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { stores } from "@/mocks/misc";
+import { useQuery } from "@tanstack/react-query";
+import { listStores } from "@/services/api/user.service";
+import { SkeletonLine } from "@/components/common/states";
 
 export default function StoresPage() {
   const [query, setQuery] = useState("");
+  const { data: stores = [], isLoading } = useQuery({ queryKey: ["stores"], queryFn: listStores, staleTime: 10 * 60 * 1000 });
   const filtered = stores.filter((s) => s.city.toLowerCase().includes(query.toLowerCase()) || s.country.toLowerCase().includes(query.toLowerCase()));
 
   return (
@@ -22,6 +25,7 @@ export default function StoresPage() {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
         <div className="flex flex-col gap-3">
+          {isLoading && [0, 1, 2].map((i) => <SkeletonLine key={i} className="h-28 w-full" />)}
           {filtered.map((store) => (
             <div key={store.id} className="rounded-2xl border border-border bg-white p-4">
               <h3 className="font-bold">{store.name}</h3>

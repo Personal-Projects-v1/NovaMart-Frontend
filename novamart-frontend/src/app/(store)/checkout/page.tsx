@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,11 +10,14 @@ import { toast } from "sonner";
 import { CreditCard, Landmark, Smartphone, Wallet } from "lucide-react";
 import { CheckoutStepper } from "@/components/checkout/checkout-stepper";
 import { Button } from "@/components/common/button";
-import { EmptyState } from "@/components/common/states";
+import { EmptyState, SkeletonLine } from "@/components/common/states";
 import { addressSchema, customerInfoSchema, type AddressValues, type CustomerInfoValues } from "@/schemas/checkout.schema";
 import { useCartStore } from "@/store/cart.store";
-import { productById } from "@/mocks/products";
-import { addresses as savedAddresses } from "@/mocks/misc";
+import { useQuery } from "@tanstack/react-query";
+import { useCartLines } from "@/hooks/use-cart-lines";
+import { useAuthStore } from "@/store/auth.store";
+import { listAddresses } from "@/services/api/user.service";
+import { errorMessage } from "@/services/api/client";
 import { placeOrder, validateCoupon } from "@/services/api/order.service";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -24,38 +27,53 @@ type PaymentMethod = "card" | "mobile-money" | "paypal" | "bank";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clear);
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const { items, lines, subtotal, isLoading: cartLoading } = useCartLines();
+  const addressesQuery = useQuery({ queryKey: ["me", "addresses"], queryFn: listAddresses, enabled: isAuthenticated });
+  const savedAddresses = addressesQuery.data ?? [];
   const [step, setStep] = useState(0);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfoValues | null>(null);
   const [address, setAddress] = useState<AddressValues | null>(null);
-  const [savedAddressId, setSavedAddressId] = useState<string | null>(savedAddresses[0]?.id ?? null);
-  const [useNewAddress, setUseNewAddress] = useState(false);
+  const [pickedAddressId, setSavedAddressId] = useState<string | null>(null);
+  const [wantsNewAddress, setUseNewAddress] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express" | "pickup">("standard");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [placing, setPlacing] = useState(false);
   const [coupon, setCoupon] = useState<{ code: string; value: number; type: "percent" | "fixed" } | null>(null);
 
-  const lines = items
-    .map((item) => ({ item, product: productById(item.productId) }))
-    .filter((l): l is { item: typeof items[number]; product: NonNullable<ReturnType<typeof productById>> } => !!l.product);
-
-  const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.item.quantity, 0);
+  // default to the account's default address until the shopper picks another one; guests always enter a new one
+  const savedAddressId = pickedAddressId ?? savedAddresses.find((a) => a.isDefault)?.id ?? savedAddresses[0]?.id ?? null;
+  const useNewAddress = wantsNewAddress || savedAddresses.length === 0;
   const discount = coupon ? (coupon.type === "percent" ? Math.round(subtotal * (coupon.value / 100) * 100) / 100 : coupon.value) : 0;
   const shipping = shippingMethod === "pickup" ? 0 : shippingMethod === "express" ? 19.99 : subtotal > 200 ? 0 : 9.99;
   const tax = Math.round((subtotal - discount) * 0.05 * 100) / 100;
   const total = Math.max(0, subtotal - discount) + shipping + tax;
 
-  const infoForm = useForm<CustomerInfoValues>({ resolver: zodResolver(customerInfoSchema), defaultValues: { email: "", firstName: "", lastName: "", phone: "" } });
+  const infoForm = useForm<CustomerInfoValues>({ resolver: zodResolver(customerInfoSchema), defaultValues: { email: user?.email ?? "", firstName: user?.firstName ?? "", lastName: user?.lastName ?? "", phone: user?.phone ?? "" } });
+  // The session only becomes visible after hydration, so prefill the contact step once we know who is signed in.
+  const userId = user?.id;
+  useEffect(() => {
+    if (!user) return;
+    infoForm.reset({ email: user.email, firstName: user.firstName, lastName: user.lastName, phone: user.phone ?? "" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the signed-in account changes, never on every keystroke
+  }, [userId]);
+
   const addressForm = useForm<AddressValues>({
     resolver: zodResolver(addressSchema),
     defaultValues: { fullName: "", phone: "", country: "Rwanda", province: "", city: "", district: "", street: "", postalCode: "" },
   });
 
-  const resolvedAddress = useMemo(() => {
-    if (useNewAddress) return address;
-    return savedAddresses.find((a) => a.id === savedAddressId) ?? null;
-  }, [useNewAddress, address, savedAddressId]);
+  const resolvedAddress = useNewAddress ? address : (savedAddresses.find((a) => a.id === savedAddressId) ?? null);
+
+  if (items.length > 0 && lines.length === 0 && cartLoading) {
+    return (
+      <div className="container-shell flex flex-col gap-4 py-12">
+        {[0, 1, 2].map((i) => <SkeletonLine key={i} className="h-20 w-full" />)}
+      </div>
+    );
+  }
 
   if (lines.length === 0 && step === 0) {
     return (
@@ -72,22 +90,31 @@ export default function CheckoutPage() {
     }
     setPlacing(true);
     try {
+      // The server re-prices every line from the catalog, so only ids/quantities are sent (never prices).
       const order = await placeOrder({
-        items,
-        address: ("id" in resolvedAddress ? resolvedAddress : { ...resolvedAddress, id: "addr-new" }) as import("@/types").Address,
+        items: lines.map(({ item }) => ({ productId: item.productId, quantity: item.quantity, selectedVariants: item.selectedVariants })),
+        address: {
+          fullName: resolvedAddress.fullName,
+          phone: resolvedAddress.phone,
+          email: (resolvedAddress as { email?: string }).email || customerInfo?.email || user?.email || undefined,
+          country: resolvedAddress.country,
+          province: resolvedAddress.province,
+          city: resolvedAddress.city,
+          district: resolvedAddress.district || undefined,
+          street: resolvedAddress.street,
+          postalCode: resolvedAddress.postalCode || undefined,
+        },
+        contactEmail: customerInfo?.email || user?.email || undefined,
+        contactPhone: customerInfo?.phone || resolvedAddress.phone,
         shippingMethod,
         paymentMethod,
-        subtotal,
-        discount,
-        shipping,
-        tax,
-        total,
+        couponCode: coupon?.code,
       });
       clearCart();
       toast.success("Order placed successfully!");
-      router.push(`/checkout/success?order=${order.orderNumber}`);
-    } catch {
-      toast.error("Something went wrong placing your order. Please try again.");
+      router.push(`/checkout/success?order=${encodeURIComponent(order.orderNumber)}`);
+    } catch (e) {
+      toast.error(errorMessage(e, "Something went wrong placing your order. Please try again."));
     } finally {
       setPlacing(false);
     }
@@ -175,7 +202,7 @@ export default function CheckoutPage() {
                   <Field label="Street Address" error={addressForm.formState.errors.street?.message}><input {...addressForm.register("street")} className="input" /></Field>
                   <Field label="Postal Code (optional)"><input {...addressForm.register("postalCode")} className="input" /></Field>
                   <div className="flex gap-3">
-                    <Button type="button" variant="outline" onClick={() => setUseNewAddress(false)}>Use Saved Address</Button>
+                    {savedAddresses.length > 0 && <Button type="button" variant="outline" onClick={() => setUseNewAddress(false)}>Use Saved Address</Button>}
                     <Button type="submit">Save & Continue</Button>
                   </div>
                 </form>
@@ -299,11 +326,15 @@ export default function CheckoutPage() {
                   onKeyDown={async (e) => {
                     if (e.key === "Enter") {
                       const value = (e.target as HTMLInputElement).value;
-                      const result = await validateCoupon(value, subtotal);
-                      if (result.coupon) {
-                        setCoupon(result.coupon);
-                        toast.success("Coupon applied");
-                      } else toast.error(result.error ?? "Invalid coupon");
+                      try {
+                        const result = await validateCoupon(value, subtotal);
+                        if (result.coupon) {
+                          setCoupon(result.coupon);
+                          toast.success("Coupon applied");
+                        } else toast.error(result.error ?? "Invalid coupon");
+                      } catch (err) {
+                        toast.error(errorMessage(err));
+                      }
                     }
                   }}
                   className="input flex-1"

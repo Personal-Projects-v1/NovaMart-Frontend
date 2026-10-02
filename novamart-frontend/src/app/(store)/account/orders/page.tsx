@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Package } from "lucide-react";
-import { EmptyState } from "@/components/common/states";
+import { EmptyState, ErrorState, SkeletonLine } from "@/components/common/states";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
-import { orders } from "@/mocks/misc";
+import { useQuery } from "@tanstack/react-query";
+import { listOrders } from "@/services/api/order.service";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { OrderStatus } from "@/types";
@@ -21,6 +22,7 @@ const TABS: { value: OrderStatus | "all"; label: string }[] = [
 
 export default function OrdersPage() {
   const [tab, setTab] = useState<OrderStatus | "all">("all");
+  const { data: orders = [], isLoading, isError, refetch } = useQuery({ queryKey: ["me", "orders"], queryFn: listOrders });
   const filtered = tab === "all" ? orders : orders.filter((o) => o.status === tab);
 
   return (
@@ -37,7 +39,11 @@ export default function OrdersPage() {
         ))}
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col gap-3">{[0, 1, 2].map((i) => <SkeletonLine key={i} className="h-20 w-full" />)}</div>
+      ) : isError ? (
+        <ErrorState onRetry={() => refetch()} />
+      ) : filtered.length === 0 ? (
         <EmptyState icon={Package} title="No orders found" description="Orders matching this filter will appear here." />
       ) : (
         <div className="flex flex-col gap-3">

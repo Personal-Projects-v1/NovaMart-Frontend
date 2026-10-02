@@ -6,6 +6,7 @@ import { LayoutDashboard, User, Package, MapPin, Heart, Star, Bell, Shield, Sett
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
 import { toast } from "sonner";
+import { logout as logoutRequest } from "@/services/api/auth.service";
 
 const NAV = [
   { href: "/account", label: "Overview", icon: LayoutDashboard },
@@ -39,7 +40,7 @@ export function AccountSidebar() {
         );
       })}
       <button
-        onClick={() => { logout(); toast.success("Signed out"); router.push("/login"); }}
+        onClick={async () => { await logoutRequest(); logout(); toast.success("Signed out"); router.push("/login"); }}
         className="mt-2 flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-brand hover:bg-brand-soft"
       >
         <LogOut size={16} /> Sign Out

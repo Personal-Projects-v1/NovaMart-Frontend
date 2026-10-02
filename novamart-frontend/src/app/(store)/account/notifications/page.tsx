@@ -3,10 +3,14 @@
 import { useState } from "react";
 import { Bell, Package, Tag, TrendingDown, Shield, PackageCheck } from "lucide-react";
 import { Button } from "@/components/common/button";
-import { EmptyState } from "@/components/common/states";
-import { notifications as initialNotifications } from "@/mocks/misc";
+import { EmptyState, SkeletonLine } from "@/components/common/states";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import Link from "next/link";
+import { deleteNotification, listNotifications, markAllNotificationsRead, markNotificationRead } from "@/services/api/user.service";
+import { errorMessage } from "@/services/api/client";
 import { relativeTime, cn } from "@/lib/utils";
-import type { NotificationType } from "@/types";
+import type { AppNotification, NotificationType } from "@/types";
 
 const ICONS: Record<NotificationType, typeof Bell> = {
   order: Package,
@@ -17,17 +21,41 @@ const ICONS: Record<NotificationType, typeof Bell> = {
 };
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const queryClient = useQueryClient();
+  const { data: notifications = [], isLoading } = useQuery({ queryKey: ["me", "notifications"], queryFn: listNotifications });
   const [filter, setFilter] = useState<NotificationType | "all">("all");
 
   const filtered = filter === "all" ? notifications : notifications.filter((n) => n.type === filter);
 
-  function markRead(id: string) {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  /** Applies a change to the cached list right away; the mutation rolls back on failure. */
+  function optimistic(update: (list: AppNotification[]) => AppNotification[]) {
+    const previous = queryClient.getQueryData<AppNotification[]>(["me", "notifications"]) ?? [];
+    queryClient.setQueryData<AppNotification[]>(["me", "notifications"], (list = []) => update(list));
+    return previous;
   }
-  function markAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  }
+  const rollback = (e: unknown, _v: unknown, previous: AppNotification[] | undefined) => {
+    queryClient.setQueryData(["me", "notifications"], previous);
+    toast.error(errorMessage(e));
+  };
+
+  const read = useMutation({
+    mutationFn: (id: string) => markNotificationRead(id),
+    onMutate: (id) => optimistic((l) => l.map((n) => (n.id === id ? { ...n, read: true } : n))),
+    onError: rollback,
+  });
+  const readAll = useMutation({
+    mutationFn: markAllNotificationsRead,
+    onMutate: () => optimistic((l) => l.map((n) => ({ ...n, read: true }))),
+    onError: rollback,
+  });
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteNotification(id),
+    onMutate: (id) => optimistic((l) => l.filter((n) => n.id !== id)),
+    onError: rollback,
+  });
+
+  const markRead = (id: string) => read.mutate(id);
+  const markAllRead = () => readAll.mutate();
 
   const filters: { value: NotificationType | "all"; label: string }[] = [
     { value: "all", label: "All" },
@@ -52,22 +80,28 @@ export default function NotificationsPage() {
         ))}
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <SkeletonLine key={i} className="h-16 w-full" />)}</div>
+      ) : filtered.length === 0 ? (
         <EmptyState icon={Bell} title="No notifications" description="You're all caught up." />
       ) : (
         <div className="flex flex-col gap-2">
           {filtered.map((n) => {
             const Icon = ICONS[n.type];
             return (
-              <button key={n.id} onClick={() => markRead(n.id)} className={cn("flex items-start gap-3 rounded-xl border p-3 text-left", n.read ? "border-border" : "border-brand bg-brand-soft")}>
+              <div key={n.id} onClick={() => !n.read && markRead(n.id)} className={cn("flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-left", n.read ? "border-border" : "border-brand bg-brand-soft")}>
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-brand"><Icon size={16} /></span>
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{n.title}</p>
                   <p className="text-sm text-muted">{n.body}</p>
-                  <p className="mt-1 text-xs text-muted">{relativeTime(n.createdAt)}</p>
+                  <p className="mt-1 flex items-center gap-3 text-xs text-muted">
+                    {relativeTime(n.createdAt)}
+                    {n.href && <Link href={n.href} onClick={(e) => e.stopPropagation()} className="font-semibold text-brand hover:underline">View</Link>}
+                    <button onClick={(e) => { e.stopPropagation(); remove.mutate(n.id); }} className="hover:text-brand">Dismiss</button>
+                  </p>
                 </div>
                 {!n.read && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand" />}
-              </button>
+              </div>
             );
           })}
         </div>

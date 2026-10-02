@@ -1,22 +1,19 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { categoryBySlug, categories } from "@/mocks/categories";
+import { serverGet } from "@/lib/server-api";
+import type { Category } from "@/types";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ProductListing } from "@/components/product/product-listing";
 
-export function generateStaticParams() {
-  return categories.map((c) => ({ slug: c.slug }));
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const category = categoryBySlug(slug);
+  const category = await serverGet<Category>(`/categories/${encodeURIComponent(slug)}`);
   return { title: category ? category.name : "Category" };
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const category = categoryBySlug(slug);
+  const category = await serverGet<Category>(`/categories/${encodeURIComponent(slug)}`);
   if (!category) notFound();
 
   return (

@@ -81,6 +81,8 @@ export interface Product {
   freeShipping?: boolean;
   warrantyMonths: number;
   colorSwatches?: string[];
+  /** Only meaningful in admin views; the storefront API returns active products only. */
+  active?: boolean;
 }
 
 export interface ProductWithRelations extends Product {
@@ -134,6 +136,7 @@ export type OrderStatus =
 export interface OrderItem {
   id: ID;
   productId: ID;
+  productSlug?: string | null;
   name: string;
   image: string;
   price: number;
@@ -164,6 +167,9 @@ export interface Order {
   shippingMethod: string;
   timeline: OrderTimelineEntry[];
   trackingNumber?: string;
+  couponCode?: string | null;
+  contactEmail?: string | null;
+  customerId?: string | null;
 }
 
 export interface Review {
@@ -178,6 +184,11 @@ export interface Review {
   verifiedPurchase: boolean;
   helpfulCount: number;
   createdAt: string;
+  /** approved | pending | hidden (admin moderation) */
+  status?: string;
+  productName?: string;
+  productSlug?: string;
+  productImage?: string;
 }
 
 export interface ProductQuestion {
@@ -206,6 +217,25 @@ export interface User {
   phone?: string;
   avatar?: string;
   role: UserRole;
+  createdAt: string;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  birthday?: string | null;
+  gender?: string | null;
+  preferences?: CommunicationPreferences;
+}
+
+export interface CommunicationPreferences {
+  orderUpdates: boolean;
+  promotions: boolean;
+  priceDrops: boolean;
+  newsletter: boolean;
+}
+
+export interface UserSession {
+  id: ID;
+  device: string;
+  ipAddress?: string | null;
   createdAt: string;
 }
 
@@ -242,6 +272,8 @@ export interface Collection {
   description: string;
   image: string;
   productIds: ID[];
+  /** Present on the detail endpoint only. */
+  products?: ProductWithRelations[];
 }
 
 export interface Store {

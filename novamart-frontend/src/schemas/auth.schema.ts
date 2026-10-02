@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+/** Mirrors the backend rule: 8+ chars with an uppercase letter, a lowercase letter and a number. */
+const passwordRule = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[a-z]/, "Password needs a lowercase letter")
+  .regex(/[A-Z]/, "Password needs an uppercase letter")
+  .regex(/\d/, "Password needs a number");
+
 export const loginSchema = z.object({
   email: z.string().email("Enter a valid email address"),
   password: z.string().min(1, "Password is required"),
@@ -12,8 +20,8 @@ export const registerSchema = z
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Enter a valid email address"),
-    phone: z.string().min(7, "Enter a valid phone number"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    phone: z.string().min(7, "Enter a valid phone number").regex(/^\+?[0-9\s()-]{7,20}$/, "Enter a valid phone number"),
+    password: passwordRule,
     confirmPassword: z.string().min(1, "Please confirm your password"),
     terms: z.literal(true, { error: () => ({ message: "You must accept the Terms of Service" }) }),
   })
@@ -28,7 +36,7 @@ export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 export const resetPasswordSchema = z
   .object({
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: passwordRule,
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
   .refine((data) => data.password === data.confirmPassword, {

@@ -3,8 +3,7 @@
 import * as Checkbox from "@radix-ui/react-checkbox";
 import * as Slider from "@radix-ui/react-slider";
 import { Check } from "lucide-react";
-import { categories } from "@/mocks/categories";
-import { brands } from "@/mocks/brands";
+import { useBrands, useCategories } from "@/hooks/use-catalog";
 import { PRICE_RANGE, RATING_FILTERS } from "@/constants/filters";
 import { Rating } from "@/components/common/rating";
 import { Button } from "@/components/common/button";
@@ -81,6 +80,9 @@ export function FilterPanel({
   onClear: () => void;
   hideCategoryFacet?: boolean;
 }) {
+  const { categories } = useCategories();
+  const { brands } = useBrands();
+
   function toggleArray(key: "categorySlugs" | "brandSlugs", value: string) {
     const current = filters[key];
     const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];

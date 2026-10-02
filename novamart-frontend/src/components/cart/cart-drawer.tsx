@@ -6,24 +6,19 @@ import { ShoppingBag, Trash2, X } from "lucide-react";
 import { Drawer } from "@/components/common/modal";
 import { Button } from "@/components/common/button";
 import { QuantitySelector } from "@/components/common/quantity-selector";
-import { EmptyState } from "@/components/common/states";
+import { EmptyState, SkeletonLine } from "@/components/common/states";
 import { useCartStore } from "@/store/cart.store";
-import { productById } from "@/mocks/products";
+import { useCartLines } from "@/hooks/use-cart-lines";
 import { formatPrice } from "@/lib/utils";
 import { toast } from "sonner";
 
 export function CartDrawer() {
   const isOpen = useCartStore((s) => s.isOpen);
   const closeCart = useCartStore((s) => s.closeCart);
-  const items = useCartStore((s) => s.items);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
 
-  const lines = items
-    .map((item) => ({ item, product: productById(item.productId) }))
-    .filter((l): l is { item: typeof items[number]; product: NonNullable<ReturnType<typeof productById>> } => !!l.product);
-
-  const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.item.quantity, 0);
+  const { items, lines, subtotal, isLoading } = useCartLines();
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && closeCart()} title="Shopping cart">
@@ -37,7 +32,9 @@ export function CartDrawer() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        {lines.length === 0 ? (
+        {items.length > 0 && lines.length === 0 && isLoading ? (
+          <div className="flex flex-col gap-4">{[0, 1].map((i) => <SkeletonLine key={i} className="h-20 w-full" />)}</div>
+        ) : lines.length === 0 ? (
           <EmptyState
             icon={ShoppingBag}
             title="Your cart is empty"

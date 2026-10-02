@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import * as Icons from "lucide-react";
-import { categories } from "@/mocks/categories";
+import { useCategories } from "@/hooks/use-catalog";
 
 export function CategoryQuickCards() {
+  const { categories } = useCategories();
   return (
     <section className="container-shell py-10">
       <div className="mb-5 flex items-end justify-between">

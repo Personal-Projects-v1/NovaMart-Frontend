@@ -3,6 +3,9 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { CollectionCards } from "@/components/home/collection-cards";
 import { listCollections } from "@/services/api/category.service";
 
+// rendered from live API data on each request, so a build never needs the backend
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Collections" };
 
 export default async function CollectionsPage() {

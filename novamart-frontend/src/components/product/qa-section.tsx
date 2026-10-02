@@ -7,32 +7,35 @@ import { Button } from "@/components/common/button";
 import { EmptyState } from "@/components/common/states";
 import { relativeTime } from "@/lib/utils";
 import type { ProductQuestion } from "@/types";
+import { useAuthStore } from "@/store/auth.store";
+import { askQuestion as askQuestionRequest } from "@/services/api/product.service";
+import { errorMessage } from "@/services/api/client";
 
-export function QASection({ questions }: { questions: ProductQuestion[] }) {
+export function QASection({ questions, productId }: { questions: ProductQuestion[]; productId: string }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [search, setSearch] = useState("");
   const [newQuestion, setNewQuestion] = useState("");
   const [localQuestions, setLocalQuestions] = useState(questions);
 
   const filtered = localQuestions.filter((q) => q.question.toLowerCase().includes(search.toLowerCase()));
 
-  function askQuestion() {
+  async function askQuestion() {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to ask a question.");
+      return;
+    }
     if (newQuestion.trim().length < 5) {
       toast.error("Please enter a more detailed question.");
       return;
     }
-    setLocalQuestions([
-      {
-        id: `q-new-${Date.now()}`,
-        productId: questions[0]?.productId ?? "",
-        question: newQuestion,
-        askedBy: "You",
-        askedAt: new Date().toISOString(),
-        answers: [],
-      },
-      ...localQuestions,
-    ]);
-    setNewQuestion("");
-    toast.success("Your question has been submitted.");
+    try {
+      const created = await askQuestionRequest(productId, newQuestion.trim());
+      setLocalQuestions([created, ...localQuestions]);
+      setNewQuestion("");
+      toast.success("Your question has been submitted.");
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
   }
 
   return (

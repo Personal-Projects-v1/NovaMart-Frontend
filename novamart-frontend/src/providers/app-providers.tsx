@@ -2,10 +2,12 @@
 
 import { Toaster } from "sonner";
 import { QueryProvider } from "./query-provider";
+import { AuthSync } from "./auth-sync";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryProvider>
+      <AuthSync />
       {children}
       <Toaster
         position="bottom-right"

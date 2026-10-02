@@ -3,12 +3,13 @@
 import Link from "next/link";
 import * as Icons from "lucide-react";
 import { useState } from "react";
-import { categories } from "@/mocks/categories";
+import { useCategories } from "@/hooks/use-catalog";
 import { MegaMenu } from "./mega-menu";
 import { cn } from "@/lib/utils";
 
 export function CategoryNav() {
   const [open, setOpen] = useState(false);
+  const { categories } = useCategories();
 
   return (
     <nav className="hidden border-b border-border bg-white lg:block" onMouseLeave={() => setOpen(false)}>

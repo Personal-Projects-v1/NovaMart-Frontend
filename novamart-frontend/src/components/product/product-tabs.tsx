@@ -59,7 +59,7 @@ export function ProductTabs({ product, reviews, questions }: { product: Product;
       </Tabs.Content>
 
       <Tabs.Content value="qa" className="py-6">
-        <QASection questions={questions} />
+        <QASection questions={questions} productId={product.id} />
       </Tabs.Content>
 
       <Tabs.Content value="warranty" className="py-6 text-sm leading-relaxed text-muted">

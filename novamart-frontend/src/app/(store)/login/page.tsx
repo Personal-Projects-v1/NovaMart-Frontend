@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -10,11 +10,22 @@ import { Eye, EyeOff } from "lucide-react";
 import { AuthShell } from "@/components/account/auth-shell";
 import { Button } from "@/components/common/button";
 import { loginSchema, type LoginValues } from "@/schemas/auth.schema";
-import { login } from "@/services/api/user.service";
+import { login } from "@/services/api/auth.service";
+import { errorMessage } from "@/services/api/client";
 import { useAuthStore } from "@/store/auth.store";
 
 export default function LoginPage() {
+  // useSearchParams needs a Suspense boundary for static prerendering
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setUser = useAuthStore((s) => s.login);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,10 +34,14 @@ export default function LoginPage() {
   async function onSubmit(values: LoginValues) {
     setLoading(true);
     try {
-      const user = await login(values.email, values.password);
-      setUser(user);
-      toast.success(`Welcome back, ${user.firstName}!`);
-      router.push("/account");
+      const session = await login(values.email, values.password);
+      setUser(session);
+      toast.success(`Welcome back, ${session.user.firstName}!`);
+      // only follow same-site relative redirects (e.g. back to /checkout)
+      const next = searchParams.get("next");
+      router.push(next && next.startsWith("/") && !next.startsWith("//") ? next : session.user.role === "admin" ? "/admin" : "/account");
+    } catch (e) {
+      toast.error(errorMessage(e, "Couldn't sign you in. Please try again."));
     } finally {
       setLoading(false);
     }

@@ -10,7 +10,8 @@ import { AuthShell } from "@/components/account/auth-shell";
 import { Button } from "@/components/common/button";
 import { cn } from "@/lib/utils";
 import { registerSchema, passwordStrength, type RegisterValues } from "@/schemas/auth.schema";
-import { register as registerUser } from "@/services/api/user.service";
+import { register as registerUser } from "@/services/api/auth.service";
+import { errorMessage } from "@/services/api/client";
 import { useAuthStore } from "@/store/auth.store";
 
 const STRENGTH_LABELS = ["Very weak", "Weak", "Fair", "Good", "Strong"];
@@ -27,10 +28,18 @@ export default function RegisterPage() {
   async function onSubmit(values: RegisterValues) {
     setLoading(true);
     try {
-      const user = await registerUser(values);
-      setUser(user);
+      const session = await registerUser({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        phone: values.phone,
+        password: values.password,
+      });
+      setUser(session);
       toast.success("Account created! Please verify your email.");
       router.push("/verify-email");
+    } catch (e) {
+      toast.error(errorMessage(e, "Couldn't create your account. Please try again."));
     } finally {
       setLoading(false);
     }

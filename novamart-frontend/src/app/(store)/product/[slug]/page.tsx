@@ -6,17 +6,10 @@ import { ProductBuyBox } from "@/components/product/product-buy-box";
 import { ProductTabs } from "@/components/product/product-tabs";
 import { ProductRail } from "@/components/product/product-rail";
 import { RecentlyViewedSection } from "@/components/home/recently-viewed";
-import {
-  getProductBySlug,
-  getProductQuestions,
-  getProductReviews,
-  getRelatedProducts,
-} from "@/services/api/product.service";
-import { products } from "@/mocks/products";
+import { serverGet } from "@/lib/server-api";
+import type { ProductQuestion, ProductWithRelations, Review } from "@/types";
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
-}
+const getProductBySlug = (slug: string) => serverGet<ProductWithRelations>(`/products/${encodeURIComponent(slug)}`, 30);
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -35,10 +28,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound();
 
   const [related, reviews, questions] = await Promise.all([
-    getRelatedProducts(product, 12),
-    getProductReviews(product.id),
-    getProductQuestions(product.id),
-  ]);
+    serverGet<ProductWithRelations[]>(`/products/${product.id}/related?limit=12`, 30),
+    serverGet<Review[]>(`/products/${product.id}/reviews`, 15),
+    serverGet<ProductQuestion[]>(`/products/${product.id}/questions`, 15),
+  ]).then(([r, rv, q]) => [r ?? [], rv ?? [], q ?? []] as const);
 
   const jsonLd = {
     "@context": "https://schema.org",

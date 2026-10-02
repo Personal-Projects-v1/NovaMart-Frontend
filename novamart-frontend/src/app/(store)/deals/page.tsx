@@ -3,16 +3,20 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { FlashDealsSection } from "@/components/home/flash-deals";
 import { ProductRail } from "@/components/product/product-rail";
 import { getFlashDeals, listProducts } from "@/services/api/product.service";
-import { coupons } from "@/mocks/misc";
+import { listActiveCoupons } from "@/services/api/order.service";
 import { Zap, Tag, Percent } from "lucide-react";
+
+// rendered from live API data on each request, so a build never needs the backend
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Deals & Promotions" };
 
 export default async function DealsPage() {
-  const [deals, clearance, daily] = await Promise.all([
+  const [deals, clearance, daily, coupons] = await Promise.all([
     getFlashDeals(),
     listProducts({ onSaleOnly: true, sort: "price-asc", pageSize: 8 }),
     listProducts({ onSaleOnly: true, sort: "rating", pageSize: 8 }),
+    listActiveCoupons(),
   ]);
 
   return (
@@ -37,15 +41,13 @@ export default async function DealsPage() {
         <h2 className="mb-4 flex items-center gap-2 text-xl font-bold"><Tag size={18} /> Active Coupon Codes</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           {coupons.map((c) => {
-            const expired = new Date(c.expiresAt).getTime() < Date.now();
             return (
-              <div key={c.code} className={`rounded-2xl border-2 border-dashed p-4 ${expired ? "border-border opacity-50" : "border-brand"}`}>
+              <div key={c.code} className="rounded-2xl border-2 border-dashed border-brand p-4">
                 <div className="flex items-center gap-2">
                   <Percent size={16} className="text-brand" />
                   <span className="font-mono text-lg font-bold tracking-wide">{c.code}</span>
                 </div>
                 <p className="mt-1 text-sm text-muted">{c.description}</p>
-                {expired && <p className="mt-1 text-xs font-semibold text-brand">Expired</p>}
               </div>
             );
           })}

@@ -1,8 +1,11 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { Bell, Search } from "lucide-react";
+import { RequireAuth } from "@/components/common/require-auth";
+import { AdminUserBadge } from "@/components/admin/admin-user-badge";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
+    <RequireAuth role="admin">
     <div className="flex min-h-screen bg-surface">
       <AdminSidebar />
       <div className="flex-1">
@@ -13,11 +16,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="flex items-center gap-3">
             <button aria-label="Notifications" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-surface"><Bell size={18} /></button>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-brand">A</div>
+            <AdminUserBadge />
           </div>
         </header>
         <main className="p-5">{children}</main>
       </div>
     </div>
+    </RequireAuth>
   );
 }

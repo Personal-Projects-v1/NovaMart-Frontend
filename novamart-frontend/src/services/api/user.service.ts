@@ -1,46 +1,112 @@
-import { addresses, mockUser, notifications, orders } from "@/mocks/misc";
-import { stores } from "@/mocks/misc";
-import type { Address, User } from "@/types";
-import { mockDelay } from "./client";
+import type {
+  Address,
+  AppNotification,
+  CommunicationPreferences,
+  Review,
+  Store,
+  User,
+  UserSession,
+} from "@/types";
+import { apiRequest } from "./client";
 
-/** POST /api/v1/auth/login */
-export async function login(email: string, _password: string): Promise<User> {
-  return mockDelay({ ...mockUser, email }, 500);
+/** GET /users/me */
+export function getCurrentUser() {
+  return apiRequest<User>("/users/me");
 }
 
-/** POST /api/v1/auth/register */
-export async function register(payload: { firstName: string; lastName: string; email: string }): Promise<User> {
-  return mockDelay({ ...mockUser, ...payload, id: `u-${Date.now()}` }, 600);
+/** PATCH /users/me */
+export function updateProfile(payload: {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  birthday?: string | null;
+  gender?: string | null;
+}) {
+  return apiRequest<User>("/users/me", { method: "PATCH", body: payload });
 }
 
-/** POST /api/v1/auth/forgot-password */
-export async function requestPasswordReset(_email: string) {
-  return mockDelay({ success: true }, 500);
+/** PUT /users/me/preferences */
+export function updatePreferences(preferences: CommunicationPreferences) {
+  return apiRequest<User>("/users/me/preferences", { method: "PUT", body: preferences });
 }
 
-/** POST /api/v1/auth/reset-password */
-export async function resetPassword(_token: string, _password: string) {
-  return mockDelay({ success: true }, 500);
+/** PUT /users/me/password */
+export function changePassword(currentPassword: string, newPassword: string) {
+  return apiRequest<void>("/users/me/password", { method: "PUT", body: { currentPassword, newPassword } });
 }
 
-/** GET /api/v1/users/me */
-export async function getCurrentUser(): Promise<User> {
-  return mockDelay(mockUser);
+// ----- addresses -----------------------------------------------------------------------------
+
+export type AddressInput = Omit<Address, "id"> & { id?: string };
+
+function addressBody(a: AddressInput) {
+  // the id travels in the URL, not the body
+  const rest: Partial<AddressInput> = { ...a };
+  delete rest.id;
+  return rest;
 }
 
-/** GET /api/v1/users/me/addresses */
-export async function listAddresses(): Promise<Address[]> {
-  return mockDelay(addresses);
+/** GET /users/me/addresses */
+export function listAddresses() {
+  return apiRequest<Address[]>("/users/me/addresses");
 }
 
-export async function listNotifications() {
-  return mockDelay(notifications);
+export function createAddress(address: AddressInput) {
+  return apiRequest<Address>("/users/me/addresses", { method: "POST", body: addressBody(address) });
 }
 
-export async function listOrders() {
-  return mockDelay(orders);
+export function updateAddress(id: string, address: AddressInput) {
+  return apiRequest<Address>(`/users/me/addresses/${id}`, { method: "PUT", body: addressBody(address) });
 }
 
-export async function listStores() {
-  return mockDelay(stores);
+export function deleteAddress(id: string) {
+  return apiRequest<void>(`/users/me/addresses/${id}`, { method: "DELETE" });
+}
+
+export function setDefaultAddress(id: string) {
+  return apiRequest<Address>(`/users/me/addresses/${id}/default`, { method: "PATCH" });
+}
+
+// ----- sessions ------------------------------------------------------------------------------
+
+export function listSessions() {
+  return apiRequest<UserSession[]>("/users/me/sessions");
+}
+
+export function revokeSession(id: string) {
+  return apiRequest<void>(`/users/me/sessions/${id}`, { method: "DELETE" });
+}
+
+// ----- notifications -------------------------------------------------------------------------
+
+export function listNotifications() {
+  return apiRequest<AppNotification[]>("/notifications");
+}
+
+export function markNotificationRead(id: string, read = true) {
+  return apiRequest<AppNotification>(`/notifications/${id}/${read ? "read" : "unread"}`, { method: "PATCH" });
+}
+
+export function markAllNotificationsRead() {
+  return apiRequest<void>("/notifications/read-all", { method: "POST" });
+}
+
+export function deleteNotification(id: string) {
+  return apiRequest<void>(`/notifications/${id}`, { method: "DELETE" });
+}
+
+// ----- misc ----------------------------------------------------------------------------------
+
+/** GET /users/me/reviews */
+export function listMyReviews() {
+  return apiRequest<Review[]>("/users/me/reviews");
+}
+
+export function deleteReview(id: string) {
+  return apiRequest<void>(`/reviews/${id}`, { method: "DELETE" });
+}
+
+/** GET /stores */
+export function listStores() {
+  return apiRequest<Store[]>("/stores", { anonymous: true });
 }

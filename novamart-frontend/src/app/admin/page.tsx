@@ -1,29 +1,42 @@
+"use client";
+
 import Link from "next/link";
-import { DollarSign, ShoppingCart, Users, TrendingUp, AlertTriangle } from "lucide-react";
+import { AlertTriangle, DollarSign, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { StatCard } from "@/components/admin/stat-card";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
-import { orders } from "@/mocks/misc";
-import { products } from "@/mocks/products";
+import { ErrorState, SkeletonLine } from "@/components/common/states";
+import { getDashboard } from "@/services/api/admin.service";
 import { formatDate, formatPrice } from "@/lib/utils";
 
 export default function AdminDashboardPage() {
-  const revenue = orders.reduce((sum, o) => sum + o.total, 0);
-  const avgOrder = revenue / (orders.length || 1);
-  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 10);
-  const popular = [...products].sort((a, b) => b.reviewCount - a.reviewCount).slice(0, 5);
+  const { data, isLoading, isError, refetch } = useQuery({ queryKey: ["admin", "dashboard"], queryFn: getDashboard });
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <SkeletonLine className="h-8 w-48" />
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <SkeletonLine key={i} className="h-28" />)}</div>
+        <SkeletonLine className="h-64 w-full" />
+      </div>
+    );
+  }
+  if (isError || !data) return <ErrorState onRetry={() => refetch()} />;
+
+  const change = (t: { changePercent: number | null }) => t.changePercent ?? undefined;
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted">Overview of your store&apos;s performance</p>
+        <p className="text-sm text-muted">Overview of your store&apos;s performance (change vs. the previous 30 days)</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Revenue" value={formatPrice(revenue)} change={12.4} icon={DollarSign} />
-        <StatCard label="Orders" value={String(orders.length)} change={8.1} icon={ShoppingCart} />
-        <StatCard label="Customers" value="1,204" change={4.2} icon={Users} />
-        <StatCard label="Avg. Order Value" value={formatPrice(avgOrder)} change={-2.1} icon={TrendingUp} />
+        <StatCard label="Total Revenue" value={formatPrice(data.revenue.value)} change={change(data.revenue)} icon={DollarSign} />
+        <StatCard label="Orders" value={String(data.orders.value)} change={change(data.orders)} icon={ShoppingCart} />
+        <StatCard label="Customers" value={data.customers.value.toLocaleString()} change={change(data.customers)} icon={Users} />
+        <StatCard label="Avg. Order Value" value={formatPrice(data.averageOrderValue)} icon={TrendingUp} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -43,9 +56,9 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {orders.slice(0, 6).map((o) => (
+                {data.recentOrders.map((o) => (
                   <tr key={o.id} className="border-t border-border">
-                    <td className="py-2.5 font-semibold">{o.orderNumber}</td>
+                    <td className="py-2.5 font-semibold"><Link href={`/admin/orders/${o.id}`} className="hover:text-brand">{o.orderNumber}</Link></td>
                     <td className="py-2.5 text-muted">{formatDate(o.createdAt)}</td>
                     <td className="py-2.5"><OrderStatusBadge status={o.status} /></td>
                     <td className="py-2.5 text-right font-semibold">{formatPrice(o.total)}</td>
@@ -60,10 +73,11 @@ export default function AdminDashboardPage() {
           <div className="rounded-2xl border border-border bg-white p-5">
             <h2 className="mb-3 flex items-center gap-2 text-base font-bold"><AlertTriangle size={16} className="text-warning" /> Low Stock</h2>
             <div className="flex flex-col gap-2">
-              {lowStock.slice(0, 5).map((p) => (
+              {data.lowStock.length === 0 && <p className="text-sm text-muted">Everything is well stocked.</p>}
+              {data.lowStock.slice(0, 5).map((p) => (
                 <div key={p.id} className="flex items-center justify-between text-sm">
                   <span className="line-clamp-1">{p.name}</span>
-                  <span className="font-semibold text-warning">{p.stock} left</span>
+                  <span className="font-semibold text-warning">{p.stock === 0 ? "Out" : `${p.stock} left`}</span>
                 </div>
               ))}
             </div>
@@ -71,7 +85,7 @@ export default function AdminDashboardPage() {
           <div className="rounded-2xl border border-border bg-white p-5">
             <h2 className="mb-3 text-base font-bold">Popular Products</h2>
             <div className="flex flex-col gap-2">
-              {popular.map((p) => (
+              {data.popular.map((p) => (
                 <div key={p.id} className="flex items-center justify-between text-sm">
                   <span className="line-clamp-1">{p.name}</span>
                   <span className="text-muted">{p.reviewCount} reviews</span>

@@ -1,12 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { brands } from "@/mocks/brands";
+import { serverGet } from "@/lib/server-api";
+import type { Brand } from "@/types";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+
+// rendered from live API data on each request, so a build never needs the backend
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "All Brands" };
 
-export default function BrandsPage() {
+export default async function BrandsPage() {
+  const brands = (await serverGet<Brand[]>("/brands")) ?? [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Brands" }]} />

@@ -1,30 +1,40 @@
-import { categories } from "@/mocks/categories";
-import { brands } from "@/mocks/brands";
-import { collections } from "@/mocks/misc";
-import { mockDelay } from "./client";
+import type { Brand, Category, Collection } from "@/types";
+import { ApiError, apiRequest } from "./client";
 
-/** GET /api/v1/categories */
-export async function listCategories() {
-  return mockDelay(categories);
+/** GET /categories */
+export function listCategories() {
+  return apiRequest<Category[]>("/categories", { anonymous: true });
 }
 
 export async function getCategoryBySlug(slug: string) {
-  return mockDelay(categories.find((c) => c.slug === slug) ?? null);
+  return orNull(apiRequest<Category>(`/categories/${encodeURIComponent(slug)}`, { anonymous: true }));
 }
 
-/** GET /api/v1/brands */
-export async function listBrands() {
-  return mockDelay(brands);
+/** GET /brands */
+export function listBrands() {
+  return apiRequest<Brand[]>("/brands", { anonymous: true });
 }
 
 export async function getBrandBySlug(slug: string) {
-  return mockDelay(brands.find((b) => b.slug === slug) ?? null);
+  return orNull(apiRequest<Brand>(`/brands/${encodeURIComponent(slug)}`, { anonymous: true }));
 }
 
-export async function listCollections() {
-  return mockDelay(collections);
+/** GET /collections */
+export function listCollections() {
+  return apiRequest<Collection[]>("/collections", { anonymous: true });
 }
 
+/** GET /collections/{slug} (includes the collection's products) */
 export async function getCollectionBySlug(slug: string) {
-  return mockDelay(collections.find((c) => c.slug === slug) ?? null);
+  return orNull(apiRequest<Collection>(`/collections/${encodeURIComponent(slug)}`, { anonymous: true }));
+}
+
+/** Resolves a 404 to `null` so pages can render their not-found state. */
+export async function orNull<T>(request: Promise<T>): Promise<T | null> {
+  try {
+    return await request;
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return null;
+    throw e;
+  }
 }

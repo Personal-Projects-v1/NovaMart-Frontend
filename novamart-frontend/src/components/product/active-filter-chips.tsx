@@ -1,13 +1,14 @@
 "use client";
 
 import { X } from "lucide-react";
-import { categories } from "@/mocks/categories";
-import { brands } from "@/mocks/brands";
+import { useBrands, useCategories } from "@/hooks/use-catalog";
 import { PRICE_RANGE } from "@/constants/filters";
 import { formatPrice } from "@/lib/utils";
 import type { FilterState } from "./filter-panel";
 
 export function ActiveFilterChips({ filters, onChange }: { filters: FilterState; onChange: (f: FilterState) => void }) {
+  const { categories } = useCategories();
+  const { brands } = useBrands();
   const chips: { key: string; label: string; onRemove: () => void }[] = [];
 
   filters.categorySlugs.forEach((slug) => {

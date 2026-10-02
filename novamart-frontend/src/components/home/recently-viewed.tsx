@@ -1,24 +1,15 @@
 "use client";
 
 import { useRecentlyViewedStore } from "@/store/recently-viewed.store";
-import { products } from "@/mocks/products";
-import { brands } from "@/mocks/brands";
-import { categories } from "@/mocks/categories";
+import { useProductsByIds } from "@/hooks/use-catalog";
 import { ProductGrid } from "@/components/product/product-grid";
-import type { ProductWithRelations } from "@/types";
 
 export function RecentlyViewedSection() {
   const productIds = useRecentlyViewedStore((s) => s.productIds);
-  if (productIds.length === 0) return null;
-
-  const items: ProductWithRelations[] = productIds
-    .map((id) => products.find((p) => p.id === id))
-    .filter((p): p is NonNullable<typeof p> => !!p)
-    .map((p) => ({
-      ...p,
-      brand: brands.find((b) => b.id === p.brandId)!,
-      category: categories.find((c) => c.id === p.categoryId)!,
-    }));
+  const { byId } = useProductsByIds(productIds);
+  // keep the "most recent first" order the store maintains; skip products that no longer exist
+  const items = productIds.map((id) => byId.get(id)).filter((p): p is NonNullable<typeof p> => !!p);
+  if (items.length === 0) return null;
 
   return (
     <section className="container-shell py-10">

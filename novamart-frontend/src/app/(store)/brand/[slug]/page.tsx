@@ -1,23 +1,20 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { brands } from "@/mocks/brands";
+import { serverGet } from "@/lib/server-api";
+import type { Brand } from "@/types";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ProductListing } from "@/components/product/product-listing";
 
-export function generateStaticParams() {
-  return brands.map((b) => ({ slug: b.slug }));
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const brand = brands.find((b) => b.slug === slug);
+  const brand = await serverGet<Brand>(`/brands/${encodeURIComponent(slug)}`);
   return { title: brand ? brand.name : "Brand" };
 }
 
 export default async function BrandPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const brand = brands.find((b) => b.slug === slug);
+  const brand = await serverGet<Brand>(`/brands/${encodeURIComponent(slug)}`);
   if (!brand) notFound();
 
   return (

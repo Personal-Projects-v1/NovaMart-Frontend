@@ -1,8 +1,10 @@
 import { AccountSidebar } from "@/components/account/account-sidebar";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { RequireAuth } from "@/components/common/require-auth";
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   return (
+    <RequireAuth>
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Account" }]} />
       <h1 className="mb-6 mt-3 text-2xl font-bold tracking-tight sm:text-3xl">My Account</h1>
@@ -11,5 +13,6 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
         <div>{children}</div>
       </div>
     </div>
+    </RequireAuth>
   );
 }

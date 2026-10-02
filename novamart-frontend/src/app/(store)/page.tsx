@@ -17,6 +17,9 @@ import {
 } from "@/services/api/product.service";
 import { listBrands, listCollections } from "@/services/api/category.service";
 
+// rendered from live API data on each request, so a build never needs the backend
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [trending, deals, newArrivals, bestSellers, recommended, brands, collections] = await Promise.all([
     getTrendingProducts(12),
