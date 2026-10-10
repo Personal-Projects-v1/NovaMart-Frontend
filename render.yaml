@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: novamart-frontend
+    env: node
+    region: oregon
+    plan: free
+    rootDir: novamart-frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: http://localhost:8080/api/v1
