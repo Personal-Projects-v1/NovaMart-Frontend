@@ -20,16 +20,34 @@ import { listBrands, listCollections } from "@/services/api/category.service";
 // rendered from live API data on each request, so a build never needs the backend
 export const dynamic = "force-dynamic";
 
+async function fetchDataSafely() {
+  try {
+    const [trending, deals, newArrivals, bestSellers, recommended, brands, collections] = await Promise.all([
+      getTrendingProducts(12).catch(() => []),
+      getFlashDeals().catch(() => []),
+      getNewArrivals(6).catch(() => []),
+      getBestSellers(6).catch(() => []),
+      getRecommendedProducts(6).catch(() => []),
+      listBrands().catch(() => []),
+      listCollections().catch(() => []),
+    ]);
+    return { trending, deals, newArrivals, bestSellers, recommended, brands, collections };
+  } catch (error) {
+    console.error('Failed to fetch homepage data:', error);
+    return {
+      trending: [],
+      deals: [],
+      newArrivals: [],
+      bestSellers: [],
+      recommended: [],
+      brands: [],
+      collections: []
+    };
+  }
+}
+
 export default async function HomePage() {
-  const [trending, deals, newArrivals, bestSellers, recommended, brands, collections] = await Promise.all([
-    getTrendingProducts(12),
-    getFlashDeals(),
-    getNewArrivals(6),
-    getBestSellers(6),
-    getRecommendedProducts(6),
-    listBrands(),
-    listCollections(),
-  ]);
+  const { trending, deals, newArrivals, bestSellers, recommended, brands, collections } = await fetchDataSafely();
 
   return (
     <div>
