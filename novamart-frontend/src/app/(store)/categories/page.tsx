@@ -1,15 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { serverGet } from "@/lib/server-api";
+import type { Category } from "@/types";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 
-// TEMPORARY: Disabled API integration until backend is deployed
-// export const dynamic = "force-dynamic";
+// rendered from live API data on each request
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "All Categories" };
 
-export default function CategoriesPage() {
-  const categories: any[] = [];
+export default async function CategoriesPage() {
+  const categories = (await serverGet<Category[]>("/categories").catch(() => null)) ?? [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Categories" }]} />

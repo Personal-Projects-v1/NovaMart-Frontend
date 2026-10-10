@@ -2,19 +2,22 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { FlashDealsSection } from "@/components/home/flash-deals";
 import { ProductRail } from "@/components/product/product-rail";
+import { getFlashDeals, listProducts } from "@/services/api/product.service";
+import { listActiveCoupons } from "@/services/api/order.service";
 import { Zap, Tag, Percent } from "lucide-react";
 
-// TEMPORARY: Disabled API integration until backend is deployed
-// export const dynamic = "force-dynamic";
+// rendered from live API data on each request
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Deals & Promotions" };
 
-export default function DealsPage() {
-  // Dummy data - replace with real API calls later
-  const deals: any[] = [];
-  const clearance: any = { items: [] };
-  const daily: any = { items: [] };
-  const coupons: any[] = [];
+export default async function DealsPage() {
+  const [deals, clearance, daily, coupons] = await Promise.all([
+    getFlashDeals().catch(() => []),
+    listProducts({ onSaleOnly: true, sort: "price-asc", pageSize: 8 }).catch(() => ({ items: [] })),
+    listProducts({ onSaleOnly: true, sort: "rating", pageSize: 8 }).catch(() => ({ items: [] })),
+    listActiveCoupons().catch(() => []),
+  ]);
 
   return (
     <div>
