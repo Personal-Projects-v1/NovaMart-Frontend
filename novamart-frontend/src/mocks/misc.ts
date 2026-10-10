@@ -12,10 +12,10 @@ import { products } from "./products";
 
 export const mockUser: User = {
   id: "u-1",
-  firstName: "Happy",
-  lastName: "C.",
-  email: "cyizhappy@gmail.com",
-  phone: "+250 788 123 456",
+  firstName: "Isaac",
+  lastName: "P.",
+  email: "isaprecieux112@gmail.com",
+  phone: "+250 799 401 377",
   role: "customer",
   createdAt: new Date(Date.now() - 240 * 86400000).toISOString(),
 };
@@ -23,9 +23,9 @@ export const mockUser: User = {
 export const addresses: Address[] = [
   {
     id: "addr-1",
-    fullName: "Happy C.",
-    phone: "+250 788 123 456",
-    email: "cyizhappy@gmail.com",
+    fullName: "Isaac P.",
+    phone: "+250 799 401 377",
+    email: "isaprecieux112@gmail.com",
     country: "Rwanda",
     province: "Kigali City",
     city: "Kigali",
