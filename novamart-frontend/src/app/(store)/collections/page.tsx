@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { CollectionCards } from "@/components/home/collection-cards";
-import { listCollections } from "@/services/api/category.service";
 
-// rendered from live API data on each request, so a build never needs the backend
-export const dynamic = "force-dynamic";
+// TEMPORARY: Disabled API integration until backend is deployed
+// export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Collections" };
 
-export default async function CollectionsPage() {
-  const collections = await listCollections();
+export default function CollectionsPage() {
+  const collections = [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Collections" }]} />

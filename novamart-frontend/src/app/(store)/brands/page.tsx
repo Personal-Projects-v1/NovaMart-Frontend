@@ -1,17 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { serverGet } from "@/lib/server-api";
-import type { Brand } from "@/types";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { BrandMark } from "@/components/common/brand-mark";
 
-// rendered from live API data on each request, so a build never needs the backend
-export const dynamic = "force-dynamic";
+// TEMPORARY: Disabled API integration until backend is deployed
+// export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "All Brands" };
 
-export default async function BrandsPage() {
-  const brands = (await serverGet<Brand[]>("/brands")) ?? [];
+export default function BrandsPage() {
+  const brands = [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Brands" }]} />

@@ -8,46 +8,20 @@ import { FlashDealsSection } from "@/components/home/flash-deals";
 import { ProductRail } from "@/components/product/product-rail";
 import { Newsletter } from "@/components/layout/newsletter";
 import { RecentlyViewedSection } from "@/components/home/recently-viewed";
-import {
-  getBestSellers,
-  getFlashDeals,
-  getNewArrivals,
-  getRecommendedProducts,
-  getTrendingProducts,
-} from "@/services/api/product.service";
-import { listBrands, listCollections } from "@/services/api/category.service";
 
-// rendered from live API data on each request, so a build never needs the backend
-export const dynamic = "force-dynamic";
+// TEMPORARY: Using static dummy data until backend is deployed
+// Remove "force-dynamic" to allow static generation
+// export const dynamic = "force-dynamic";
 
-async function fetchDataSafely() {
-  try {
-    const [trending, deals, newArrivals, bestSellers, recommended, brands, collections] = await Promise.all([
-      getTrendingProducts(12).catch(() => []),
-      getFlashDeals().catch(() => []),
-      getNewArrivals(6).catch(() => []),
-      getBestSellers(6).catch(() => []),
-      getRecommendedProducts(6).catch(() => []),
-      listBrands().catch(() => []),
-      listCollections().catch(() => []),
-    ]);
-    return { trending, deals, newArrivals, bestSellers, recommended, brands, collections };
-  } catch (error) {
-    console.error('Failed to fetch homepage data:', error);
-    return {
-      trending: [],
-      deals: [],
-      newArrivals: [],
-      bestSellers: [],
-      recommended: [],
-      brands: [],
-      collections: []
-    };
-  }
-}
-
-export default async function HomePage() {
-  const { trending, deals, newArrivals, bestSellers, recommended, brands, collections } = await fetchDataSafely();
+export default function HomePage() {
+  // Dummy data - replace with real API calls later
+  const trending = [];
+  const deals = [];
+  const newArrivals = [];
+  const bestSellers = [];
+  const recommended = [];
+  const brands = [];
+  const collections = [];
 
   return (
     <div>
