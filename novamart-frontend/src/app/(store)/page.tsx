@@ -15,13 +15,13 @@ import { RecentlyViewedSection } from "@/components/home/recently-viewed";
 
 export default function HomePage() {
   // Dummy data - replace with real API calls later
-  const trending = [];
-  const deals = [];
-  const newArrivals = [];
-  const bestSellers = [];
-  const recommended = [];
-  const brands = [];
-  const collections = [];
+  const trending: any[] = [];
+  const deals: any[] = [];
+  const newArrivals: any[] = [];
+  const bestSellers: any[] = [];
+  const recommended: any[] = [];
+  const brands: any[] = [];
+  const collections: any[] = [];
 
   return (
     <div>

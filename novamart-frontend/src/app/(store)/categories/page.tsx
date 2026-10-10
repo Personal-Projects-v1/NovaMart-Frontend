@@ -9,7 +9,7 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 export const metadata: Metadata = { title: "All Categories" };
 
 export default function CategoriesPage() {
-  const categories = [];
+  const categories: any[] = [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Categories" }]} />

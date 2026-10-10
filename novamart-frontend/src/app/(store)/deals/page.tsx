@@ -11,10 +11,10 @@ export const metadata: Metadata = { title: "Deals & Promotions" };
 
 export default function DealsPage() {
   // Dummy data - replace with real API calls later
-  const deals = [];
-  const clearance = { items: [] };
-  const daily = { items: [] };
-  const coupons = [];
+  const deals: any[] = [];
+  const clearance: any = { items: [] };
+  const daily: any = { items: [] };
+  const coupons: any[] = [];
 
   return (
     <div>

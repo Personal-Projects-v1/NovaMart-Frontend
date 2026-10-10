@@ -9,7 +9,7 @@ import { BrandMark } from "@/components/common/brand-mark";
 export const metadata: Metadata = { title: "All Brands" };
 
 export default function BrandsPage() {
-  const brands = [];
+  const brands: any[] = [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Brands" }]} />

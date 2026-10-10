@@ -8,7 +8,7 @@ import { CollectionCards } from "@/components/home/collection-cards";
 export const metadata: Metadata = { title: "Collections" };
 
 export default function CollectionsPage() {
-  const collections = [];
+  const collections: any[] = [];
   return (
     <div className="container-shell py-6">
       <Breadcrumbs items={[{ label: "Collections" }]} />
